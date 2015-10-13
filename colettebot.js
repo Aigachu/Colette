@@ -153,6 +153,18 @@ colette.on("message", function (msg) {
       colette.sendMessage( msg.channel, "Gotcha! The general channel has been changed to **" + GENERAL_CHANNEL + "**!");
     }
 
+    // !joinServer command.
+    // Accepts 1 argument
+    // Joins a server using the given server resolvable in the argument.
+    if( msg.content.substring(0, '!joinServer'.length) == '!joinServer' ) {
+      var resolvable = msg.content.replace("!joinServer ", "");
+      colette.joinServer(resolvable);
+
+      //@TODO trycatch for error handling.
+      colette.sendMessage( msg.channel, "Infiltrating...");
+    }
+
+
     /*************************************************************/
 
     /* === Twitch Announcements === */
