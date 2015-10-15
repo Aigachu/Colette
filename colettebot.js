@@ -21,7 +21,7 @@ var nconf = require('nconf');
 // This instantiates a Discord Client that the bot uses.
 // @TODO - FUNCTIONS DOCUMENTATION
 
-// var Auth = require("./auth.json"); // @TODO JSON STORAGE 
+// var Auth = require("./auth.json"); // @TODO JSON STORAGE
 var colette = new Discord.Client();
 
 // Twitch
@@ -89,6 +89,10 @@ var configs;
 // Command/Reactions Cooldowns
 var cooldowns = [];
 
+// Server Configurations
+// TO BE COMPLETED
+
+
 /*************************************************************/
 
 /* === The Good Stuff === */
@@ -99,6 +103,11 @@ colette.on("message", function (msg) {
 
   // Log Messages for DEV purposes
   console.log(msg);
+
+  if(!msg.isPrivate) {
+    // Global Variable across message reactions to get the server the message was taken from.
+    var msgServer = msg.author.server.name;
+  }
 
   // /* == Admin Only Reactions == */
   if(isAdminMessage(msg)) {
@@ -187,7 +196,7 @@ colette.on("message", function (msg) {
       twitch.streamIsOnline(twitch_channel, function( data ) {
         if(data.stream) {
           colette.sendMessage( msg.channel, "Success! That stream is online Aiga! I'll announce it now. :blue_heart:");
-          colette.sendMessage( colette.getChannel("name", ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
+          colette.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
         } else {
           colette.sendMessage( msg.channel, "Sorry Aiga! That stream is either invalid or offline!");
         }
@@ -201,19 +210,19 @@ colette.on("message", function (msg) {
 
       colette.sendMessage( msg.channel, "I've activated auto announcements for the following stream: **" + twitch_channel + "** !\nThis only works for valid Twitch channels. There will never be an alert if the channel is invalid.\nThe message will be announced once the channel goes live!");
 
-      stream_check_interval_ids[twitch_channel] = setInterval(function () {
+      stream_check_interval_ids[msgServer + twitch_channel] = setInterval(function () {
         twitch.streamIsOnline(twitch_channel, function( data ) {
           if(data.stream) {
             colette.sendMessage( msg.channel, "Oh! **" + twitch_channel + "** went online Aiga! I\'ll announce it now! :) :blue_heart:");
-            colette.sendMessage( colette.getChannel("name", ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
-            clearInterval(stream_check_interval_ids[twitch_channel]);
+            colette.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
+            clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
           } else {
             console.log("Stream checked. Offline...");
           }
         });
       }, 1000 * 5);
     } // END Twitch Stream Interval Check - Activate
-    
+
     // !autoAnnOff
     // Twitch Stream Interval Check - Manual Deactivation
     if( msg.content.substring(0, '!autoAnnOff'.length) == '!autoAnnOff' ) {
@@ -223,7 +232,7 @@ colette.on("message", function (msg) {
       clearInterval(stream_check_interval_ids[twitch_channel]);
 
       colette.sendMessage( msg.channel, "I've deactivated auto announcements for **" + twitch_channel + "**!");
-    
+
     } // END Twitch Stream Interval Check - Manual Deactivation
 
     /* === END Twitch Announcements === */
@@ -232,6 +241,7 @@ colette.on("message", function (msg) {
 
   } /* == END Admin Only Commands == */
 
+  // If someone's message contains a string close to "aiga"
   if( /Aiga/i.test(msg.content) && msg.author.id !== colette.user.id ) {
     if(notify_mentions == true) {
       pmAdmin("Looks like " + msg.author.username + " from the **" + msg.channel.server.name + "** server mentioned you. Here's the message:\n\n_'" + msg.content + "'_");
@@ -240,8 +250,40 @@ colette.on("message", function (msg) {
     // Write to a log
   }
 
+  // If someone's message contains a string close to "pere"
+  if( /Pere/i.test(msg.content) && msg.author.id !== colette.user.id) {
+    if(!cooldowns['pereMention']) {
+      var answers = new Array(
+        "jNDAK PEREDEN IS LIKE THE MOST KAWAII PERSON EVER JAASLDF",
+        "Pereden? Aiga says that she's a goat. That's pretty cool!"
+      );
+
+      // Disabled for now.
+      // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+
+      cooldowns['pereMention'] = true;
+      setTimeout(function(){ cooldowns['pereMention'] = false }, 1000 * 60 * 3);
+    }
+  }
+
+    // If someone's message contains a string close to "pere"
+  if( /Aero/i.test(msg.content) && msg.author.id !== colette.user.id) {
+    if(!cooldowns['aeroMention']) {
+      var answers = new Array(
+        "aewooooooooooooooooooo :blue_heart:",
+        ":^)"
+      );
+
+      // Disabled for now.
+      // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+
+      cooldowns['aeroMention'] = true;
+      setTimeout(function(){ cooldowns['aeroMention'] = false }, 1000 * 60 * 3);
+    }
+  }
+
   // Response to PMs
-  // Currently a bug when INITIATING a PM channel. 
+  // Currently a bug when INITIATING a PM channel.
   // Will be fixed in the future.
   // if(msg.isPrivate && msg.author != colette.user  ) {
   //   cooldowns['isPrivate'] = true;
@@ -250,7 +292,7 @@ colette.on("message", function (msg) {
   //   pmAdmin("Hey! " + msg.author.username + " messaged me...I think they're trying to flirt with me! :S");
   // }
 
-  // Funny message when I'm tagged
+  // Dork ass message when I'm tagged
   if(msg.isMentioned('77517077325287424')) {
     // @TODO Will add different answers depending on the time of day.
     if(!cooldowns['isMentioned']) {
@@ -261,7 +303,8 @@ colette.on("message", function (msg) {
         "Trying to summon Aiga are we? Let me help.\n\nHEY AIGA YOU GOD DAMN SWINE CMERE."
       );
 
-      colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+      // Disabled for now.
+      // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['isMentioned'] = true;
       setTimeout(function(){ cooldowns['isMentioned'] = false }, 1000 * 60 * 3);
@@ -324,7 +367,7 @@ colette.on("channelCreate", function(chann){
 
 
 // Login
-colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
+colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("wooo!");
   }).catch(function (error) {
@@ -352,5 +395,10 @@ function isAdminMessage(message) {
 }
 
 function pmAdmin(message) {
+  // Might be able to change this to a user for the channel resolvable.
   colette.sendMessage(colette.getChannel("id", PM_CHANNEL_ID), message);
+}
+
+function getServerChannel(serverName, channelName) {
+  return colette.getServer("name", serverName).getChannel("name", channelName);
 }
