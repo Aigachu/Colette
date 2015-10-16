@@ -254,7 +254,7 @@ colette.on("message", function (msg) {
   if( /Pere/i.test(msg.content) && msg.author.id !== colette.user.id) {
     if(!cooldowns['pereMention']) {
       var answers = new Array(
-        "jNDAK PEREDEN IS LIKE THE MOST KAWAII PERSON EVER JAASLDF",
+        "PEREDEN?! jNDAK PEREDEN IS LIKE THE MOST KAWAII PERSON EVER JAASLDF",
         "Pereden? Aiga says that she's a goat. That's pretty cool!"
       );
 
@@ -262,11 +262,11 @@ colette.on("message", function (msg) {
       // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['pereMention'] = true;
-      setTimeout(function(){ cooldowns['pereMention'] = false }, 1000 * 60 * 3);
+      setTimeout(function(){ cooldowns['pereMention'] = false }, 1000 * 60 * 5);
     }
   }
 
-    // If someone's message contains a string close to "pere"
+  // If someone's message contains a string close to "pere"
   if( /Aero/i.test(msg.content) && msg.author.id !== colette.user.id) {
     if(!cooldowns['aeroMention']) {
       var answers = new Array(
@@ -278,7 +278,25 @@ colette.on("message", function (msg) {
       // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['aeroMention'] = true;
-      setTimeout(function(){ cooldowns['aeroMention'] = false }, 1000 * 60 * 3);
+      setTimeout(function(){ cooldowns['aeroMention'] = false }, 1000 * 60 * 5);
+    }
+  }
+
+  // If someone's message contains a string close to "Colette"
+  if( /Colette/i.test(msg.content) && msg.author.id !== colette.user.id) {
+    if(!cooldowns['coletteMention']) {
+      var answers = new Array(
+        "Shhh...I'm lurking rn.",
+        "I'm too good to be Aiga's waifu tbh.",
+        "【Analysis】 Am I really a bot, or has Aigachu been on two accounts at once the whole time? :eyes:",
+        "*trips and falls on the ground*"
+      );
+
+      // Enabled for now.
+      colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+
+      cooldowns['coletteMention'] = true;
+      setTimeout(function(){ cooldowns['coletteMention'] = false }, 1000 * 60 * 5);
     }
   }
 
