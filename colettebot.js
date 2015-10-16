@@ -385,7 +385,7 @@ colette.on("channelCreate", function(chann){
 
 
 // Login
-colette.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("wooo!");
   }).catch(function (error) {
