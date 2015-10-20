@@ -255,14 +255,15 @@ colette.on("message", function (msg) {
     if(!cooldowns['pereMention']) {
       var answers = new Array(
         "PEREDEN?! jNDAK PEREDEN IS LIKE THE MOST KAWAII PERSON EVER JAASLDF",
-        "Pereden? Aiga says that she's a goat. That's pretty cool!"
+        "Pereden? Aiga says that she's a goat. That's pretty cool!",
+        ":lemon: :lemon: :lemon: :lemon: :lemon: :lemon: "
       );
 
       // Disabled for now.
-      // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+      colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['pereMention'] = true;
-      setTimeout(function(){ cooldowns['pereMention'] = false }, 1000 * 60 * 5);
+      setTimeout(function(){ cooldowns['pereMention'] = false }, 1000 * 60 * 30);
     }
   }
 
@@ -271,14 +272,15 @@ colette.on("message", function (msg) {
     if(!cooldowns['aeroMention']) {
       var answers = new Array(
         "aewooooooooooooooooooo :blue_heart:",
-        ":^)"
+        "Baero~",
+        ""
       );
 
       // Disabled for now.
-      // colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
+      colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['aeroMention'] = true;
-      setTimeout(function(){ cooldowns['aeroMention'] = false }, 1000 * 60 * 5);
+      setTimeout(function(){ cooldowns['aeroMention'] = false }, 1000 * 60 * 30);
     }
   }
 
@@ -289,14 +291,15 @@ colette.on("message", function (msg) {
         "Shhh...I'm lurking rn.",
         "I'm too good to be Aiga's waifu tbh.",
         "【Analysis】 Am I really a bot, or has Aigachu been on two accounts at once the whole time? :eyes:",
-        "*trips and falls on the ground*"
+        "*trips and falls on the ground*",
+        "Aiga better pick up Tales of Symphonia"
       );
 
       // Enabled for now.
       colette.sendMessage(msg.channel.id, answers[Math.floor((Math.random() * answers.length))]);
 
       cooldowns['coletteMention'] = true;
-      setTimeout(function(){ cooldowns['coletteMention'] = false }, 1000 * 60 * 5);
+      setTimeout(function(){ cooldowns['coletteMention'] = false }, 1000 * 60 * 10);
     }
   }
 
@@ -318,7 +321,8 @@ colette.on("message", function (msg) {
         "I call upon the envoy of the shadow realm. I summon thee...come, Aigachu!",
         "Eww. We don't need Aigachu. >_>",
         "Ouuuh you called him! He just might show up now...",
-        "Trying to summon Aiga are we? Let me help.\n\nHEY AIGA YOU GOD DAMN SWINE CMERE."
+        "Trying to summon Aiga are we? Let me help.\n\nHEY AIGA YOU GOD DAMN SWINE CMERE.",
+        "Aiga's such a dork. Don't summon him. :eyes:"
       );
 
       // Disabled for now.
@@ -373,7 +377,9 @@ colette.on("userUpdate", function (oldUser, newUser) {
   console.log(oldUser, "vs", newUser);
 
   // Send name change information to me in PMs
-  pmAdmin("Name change logged. :) Here's the information:\nUser's ID: **" + oldUser.id + "**\n\nOld Name: **" + oldUser.username + "**\nNew Name: **" + newUser.username + "**\n-------------------------------");
+  if(oldUser.username !== newUser.username) {
+    pmAdmin("Name change logged. :) Here's the information:\nUser's ID: **" + oldUser.id + "**\n\nOld Name: **" + oldUser.username + "**\nNew Name: **" + newUser.username + "**\n-------------------------------");
+  }
 
   // Log name change information in files.
   // @TODO
@@ -385,7 +391,7 @@ colette.on("channelCreate", function(chann){
 
 
 // Login
-colette.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("wooo!");
   }).catch(function (error) {
