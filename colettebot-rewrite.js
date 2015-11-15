@@ -219,17 +219,20 @@ Commands[ "autoAnn" ] = {
 
       bot.sendMessage( msg.channel, "I've activated auto announcements for the following stream: **" + twitch_channel + "** !\nThis only works for valid Twitch channels. There will never be an alert if the channel is invalid.\nThe message will be announced once the channel goes live!");
 
-      stream_check_interval_ids[msgServer + twitch_channel] = setInterval(function () {
-        twitch.streamIsOnline(twitch_channel, function( data ) {
-          if(data.stream) {
-            bot.sendMessage( msg.channel, "Oh! **" + twitch_channel + "** went online Aiga! I\'ll announce it now! :) :blue_heart:");
-            bot.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
-            clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
-          } else {
-            console.log("Stream checked. Offline...");
-          }
-        });
-      }, 1000 * 5);
+      if(!stream_check_interval_ids[msgServer + twitch_channel]) {
+        stream_check_interval_ids[msgServer + twitch_channel] = setInterval(function () {
+          twitch.streamIsOnline(twitch_channel, function( data ) {
+            if(data.stream) {
+              bot.sendMessage( msg.channel, "Oh! **" + twitch_channel + "** went online Aiga! I\'ll announce it now! :) :blue_heart:");
+              bot.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
+              clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
+              stream_check_interval_ids[msgServer + twitch_channel] = null;
+            } else {
+              console.log("Stream checked. Offline...");
+            }
+          });
+        }, 1000 * 5);
+      }
     } else {
       bot.sendMessage( msg.channel, "Specify a valid Twitch channel...Or I'll beat the crap out of you Aiga.");
     }
@@ -243,13 +246,15 @@ Commands[ "deAutoAnn" ] = {
       var twitch_channel = params[1];
       // @todo clear all if no argument
       // if with new message
-      clearInterval(stream_check_interval_ids[twitch_channel]);
+      clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
+      stream_check_interval_ids[msgServer + twitch_channel] = null;
 
       colette.sendMessage( msg.channel, "I've deactivated auto announcements for **" + twitch_channel + "**!");
     } else {
       for (var key in stream_check_interval_ids) {
         if (stream_check_interval_ids.hasOwnProperty(key)) {
           clearInterval(stream_check_interval_ids[key]);
+          stream_check_interval_ids[key] = null;
         }
       }
       bot.sendMessage( msg.channel, "You didn't specify a channel...So I cleared all of the queued auto announcements. ;)");
@@ -282,12 +287,12 @@ colette.on("message", function (msg) {
   // Commands
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
-      if(msg.content.substring(0, (CommandPrefix + key).length) === CommandPrefix + key && msg.author.id !== colette.user.id) {
+      var params = msg.content.split(" ");
+      if(params[0] === CommandPrefix + key && msg.author.id !== colette.user.id) {
         // Check op level
         if(Commands[key].oplevel === 1) {
           if(isAdminMessage(msg)) {
             // Run the command's function.
-            var params = msg.content.split(" ");
             Commands[key].fn(colette, params, msg, msgServer);
           }
         } else {
