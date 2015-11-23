@@ -9,6 +9,9 @@ var TwitchObject = require('./lib/twitch.js');
 // filesystem
 var fs = require('fs');
 
+// request
+var request = require('request');
+
 // moment
 var moment = require('moment-timezone');
 
@@ -262,6 +265,56 @@ Commands[ "deAutoAnn" ] = {
   }
 }
 
+Commands[ "loadEmotes" ] = {
+  oplevel: 1,
+  fn: function( bot, params, msg, msgServer ) {
+    if(params[1]) {
+      var twitch_channel = params[1];
+      twitch.getEmotes(twitch_channel, function( data ) {
+        for(var key in data) {
+          if(data.hasOwnProperty(key)) {
+            var obj = data[key];
+            for(var prop in obj) {
+              if(obj.hasOwnProperty(prop)) {
+                var channel_dir = 'resources/emotes/' + twitch_channel;
+                if (!fs.existsSync(channel_dir)){
+                  fs.mkdirSync(channel_dir);
+                }
+                download("http://" + obj[prop].substring(2), "resources/emotes/" + twitch_channel + "/" + prop + ".png", function() {
+                  console.log('Emote successfully loaded from channel.');
+                });
+              }
+            }
+          }
+        }
+      });
+
+      colette.sendMessage( msg.channel, "Got emotes for **" + twitch_channel + "**! Check the console!");
+    } else {
+      twitch.getEmotes("global", function( data ) {
+        for(var key in data) {
+          if (data.hasOwnProperty(key)) {
+            var obj = data[key];
+            for(var prop in obj) {
+              if(obj.hasOwnProperty(prop)) {
+                var global_dir = 'resources/emotes/global';
+                if (!fs.existsSync(global_dir)){
+                  fs.mkdirSync(global_dir);
+                }
+                download("http://" + obj[prop].url.substring(2), "resources/emotes/global/" + prop + ".png", function() {
+                  console.log('Global emotes successfully loaded from channel.');
+                });
+              }
+            }
+          }
+        }
+      });
+      bot.sendMessage( msg.channel, "Loaded all of Twitch's global emotes. :)");
+    }
+  }
+}
+
+
 
 // Array of all reactions.
 Reactions = [];
@@ -420,11 +473,22 @@ function isAdminMessage(message) {
   }
 }
 
+// PM admin (aka me)
 function pmme(message) {
   // Might be able to change this to a user for the channel resolvable.
   colette.sendMessage(colette.getChannel("id", PM_CHANNEL_ID), message);
 }
 
+// Function used to return channels for respective servers.
 function getServerChannel(serverName, channelName) {
   return colette.getServer("name", serverName).getChannel("name", channelName);
+}
+
+// Utility Function - download
+// Downloads file from url
+
+function download(uri, filename, callback) {
+  request.head(uri, function(err, res, body){
+    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+  });
 }
