@@ -98,6 +98,9 @@ var cooldowns = [];
 // Server Configurations
 // @todo
 
+// Emotes Initiation
+var Emotes = reloadEmotes();
+
 // Login
 colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
@@ -305,8 +308,19 @@ Commands[ "loadEmotes" ] = {
           }
         }
       });
+
       bot.sendMessage( msg.channel, "Loaded all of Twitch's global emotes. :)");
     }
+  }
+}
+
+Commands[ "reloadEmotes" ] = {
+  oplevel: 0,
+  fn: function( bot, params, msg, msgServer ) {
+
+    Emotes = reloadEmotes();
+    bot.sendMessage(msg.channel, "Emotes reloaded!");
+
   }
 }
 
@@ -323,9 +337,6 @@ Reactions[ "colette" ] = {
 
   }
 }
-
-// Emotes Initiation
-var emotes = reloadEmotes(); 
 
 /**
  * === EVENT : Message Creation (Sent)  ===
@@ -381,6 +392,14 @@ colette.on("message", function (msg) {
   }
 
   // Emotes
+  for (var key in Emotes) {
+    if(Emotes.hasOwnProperty(key)) {
+      var keygex = new RegExp(key, "i");
+      if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
+        colette.sendFile(msg.channel, Emotes[key], key + ".png");
+      }
+    }
+  }
 
 }); // END REACTIONS TO "message" EVENT
 
@@ -499,26 +518,18 @@ function download(uri, filename, callback) {
 
 // Reload Emotes
 function reloadEmotes() {
-  var efolders = [];
+  var e = [];
 
-  fs.readdir("resources/emotes", function(err, files) {
-    console.log(files);
-  });
+  var efolders = fs.readdirSync("resources/emotes");
 
-  // fs.readdir("resources/emotes", function(err, efolders) {
-  //   for (var key in efolders) {
-  //     if(efolders.hasOwnProperty(key)) {
-  //       console.log(key);
-  //       fs.readdir("resources/emotes/" + efolders[key], function(err, files) {
-  //         console.log(truekey);
-  //         for (var prop in files) {
-  //           if(files.hasOwnProperty(prop)) {
-  //             // array[files[prop]] = "resources/emotes/" + efolders[key] + "/" + files[prop];
-  //             // console.log(array);
-  //           }
-  //         }
-  //       });
-  //     }
+  for(var key in efolders) {
+    var files = fs.readdirSync("resources/emotes/" + efolders[key]) ;
+    for(var i in files) {
+      e[files[i].slice(0, -4)] = "resources/emotes/" + efolders[key] + "/" + files[i];
+    }
+  }
 
-  return efolders;
+  console.log("Emotes reloaded.");
+
+  return e;
 }
