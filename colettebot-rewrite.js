@@ -114,10 +114,6 @@ colette.on("ready", function () {
 
 /* === The Juicy Stuff === */
 
-/**
- * === EVENT : Message Creation (Sent)  ===
- */
-
 // Array of all commands.
 CommandPrefix = "!";
 Commands = [];
@@ -328,6 +324,12 @@ Reactions[ "colette" ] = {
   }
 }
 
+// Emotes Initiation
+var emotes = reloadEmotes(); 
+
+/**
+ * === EVENT : Message Creation (Sent)  ===
+ */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
   console.log(msg);
@@ -377,6 +379,8 @@ colette.on("message", function (msg) {
       }
     }
   }
+
+  // Emotes
 
 }); // END REACTIONS TO "message" EVENT
 
@@ -491,4 +495,30 @@ function download(uri, filename, callback) {
   request.head(uri, function(err, res, body){
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
   });
+}
+
+// Reload Emotes
+function reloadEmotes() {
+  var efolders = [];
+
+  fs.readdir("resources/emotes", function(err, files) {
+    console.log(files);
+  });
+
+  // fs.readdir("resources/emotes", function(err, efolders) {
+  //   for (var key in efolders) {
+  //     if(efolders.hasOwnProperty(key)) {
+  //       console.log(key);
+  //       fs.readdir("resources/emotes/" + efolders[key], function(err, files) {
+  //         console.log(truekey);
+  //         for (var prop in files) {
+  //           if(files.hasOwnProperty(prop)) {
+  //             // array[files[prop]] = "resources/emotes/" + efolders[key] + "/" + files[prop];
+  //             // console.log(array);
+  //           }
+  //         }
+  //       });
+  //     }
+
+  return efolders;
 }
