@@ -99,18 +99,20 @@ var cooldowns = [];
 // @todo
 
 // Emotes Initiation
-var Emotes = reloadEmotes();
+var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders currently present.
+var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
+var EmotesAllowedServers = []; // Will be used to manage which servers have access to this feature.
 
 // Login
 colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
-    console.log("wooo!");
+    console.log("Initating cuteness...");
   }).catch(function (error) {
     console.log(error);
   });
 
 colette.on("ready", function () {
-  console.log("Ready!");
+  console.log("Jack in! Colette! Execute!");
 })
 
 /********************************************************************************************/
@@ -264,7 +266,7 @@ Commands[ "deAutoAnn" ] = {
   }
 }
 
-Commands[ "loadEmotes" ] = {
+Commands[ "loadEmo" ] = {
   oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
     if(params[1]) {
@@ -314,12 +316,32 @@ Commands[ "loadEmotes" ] = {
   }
 }
 
-Commands[ "reloadEmotes" ] = {
+Commands[ "initEmo" ] = {
   oplevel: 0,
   fn: function( bot, params, msg, msgServer ) {
 
     Emotes = reloadEmotes();
     bot.sendMessage(msg.channel, "Emotes reloaded!");
+
+  }
+}
+
+Commands[ "aEmo" ] = {
+  oplevel: 0,
+  fn: function( bot, params, msg, msgServer ) {
+
+    EmotesOn = true;
+    bot.sendMessage(msg.channel, "Activated emotes.");
+
+  }
+}
+
+Commands[ "dEmo" ] = {
+  oplevel: 0,
+  fn: function( bot, params, msg, msgServer ) {
+
+    EmotesOn = false;
+    bot.sendMessage(msg.channel, "Activated emotes.");
 
   }
 }
@@ -392,14 +414,17 @@ colette.on("message", function (msg) {
   }
 
   // Emotes
-  for (var key in Emotes) {
-    if(Emotes.hasOwnProperty(key)) {
-      var keygex = new RegExp(key, "i");
-      if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
-        colette.sendFile(msg.channel, Emotes[key], key + ".png");
+  if(EmotesOn) {
+    for (var key in Emotes) {
+      if(Emotes.hasOwnProperty(key)) {
+        var keygex = new RegExp(key, "i");
+        if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
+          colette.sendFile(msg.channel, Emotes[key], key + ".png");
+        }
       }
     }
   }
+
 
 }); // END REACTIONS TO "message" EVENT
 
