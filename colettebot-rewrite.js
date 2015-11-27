@@ -625,7 +625,7 @@ function pmme(message) {
 
 // Function used to return channels for respective servers.
 function getServerChannel(serverName, channelName) {
-  return colette.servers.get("name", serverName).getChannel("name", channelName);
+  return colette.servers.get("name", serverName).channels.get("name", channelName);
 }
 
 // Utility Function - download
