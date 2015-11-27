@@ -95,6 +95,8 @@ var configs;
 // Command/Reactions Cooldowns
 var cooldowns = [];
 
+var NairoServ = '82343511336157184';
+
 // Server Configurations
 // @todo
 
@@ -346,6 +348,54 @@ Commands[ "dEmo" ] = {
   }
 }
 
+/* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
+Commands[ "setColor" ] = {
+  oplevel: 1,
+  fn: function( bot, params, msg, msgServer ) {
+    if(params[2]) {
+      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+    } else {
+      if(params[1]) {
+        var roles = getServerRoles(msg);
+
+        var color = params[1];
+        switch(color) {
+          case 'red':
+            bot.addMemberToRole(msg.author, roles['XMAS:RED'], function(error){
+              bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:")
+            })
+            break;
+          case 'green':
+            bot.addMemberToRole(msg.author, roles['XMAS:GREEN'], function(error){
+              bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:")
+            })
+            break;
+          case 'blue':
+            bot.addMemberToRole(msg.author, roles['XMAS:BLUE'], function(error){
+              bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:")
+            })
+            break;
+          case 'gold':
+            bot.addMemberToRole(msg.author, roles['XMAS:GOLD'], function(error){
+              bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:")
+            })
+            break;
+          case 'darkred':
+            bot.addMemberToRole(msg.author, roles['XMAS:DARKRED'], function(error){
+              bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:")
+            })
+            break;
+          default:
+            bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**")
+            break;
+        }
+      } else {
+        bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
+      }
+    }
+  }
+}
+
 
 
 // Array of all reactions.
@@ -557,4 +607,18 @@ function reloadEmotes() {
   console.log("Emotes reloaded.");
 
   return e;
+}
+
+// Get Server Roles
+function getServerRoles(msg) {
+  var rolesObject = msg.channel.server.roles;
+  var roles = [];
+
+  for (var key in rolesObject) {
+    if (rolesObject.hasOwnProperty(key)) {
+      roles[rolesObject[key]['name']] = rolesObject[key];
+    }
+  }
+
+  return roles;
 }
