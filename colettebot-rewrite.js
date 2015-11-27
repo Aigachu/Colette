@@ -357,37 +357,56 @@ Commands[ "setColor" ] = {
     } else {
       if(params[1]) {
         var roles = getServerRoles(msg);
+        var authorRoles = msg.channel.server.rolesOfUser(msg.author);
+        var userHasXMAS = false;
 
-        var color = params[1];
-        switch(color) {
-          case 'red':
-            bot.addMemberToRole(msg.author, roles['XMAS:RED'], function(error){
-              bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:")
-            })
-            break;
-          case 'green':
-            bot.addMemberToRole(msg.author, roles['XMAS:GREEN'], function(error){
-              bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:")
-            })
-            break;
-          case 'blue':
-            bot.addMemberToRole(msg.author, roles['XMAS:BLUE'], function(error){
-              bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:")
-            })
-            break;
-          case 'gold':
-            bot.addMemberToRole(msg.author, roles['XMAS:GOLD'], function(error){
-              bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:")
-            })
-            break;
-          case 'darkred':
-            bot.addMemberToRole(msg.author, roles['XMAS:DARKRED'], function(error){
-              bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:")
-            })
-            break;
-          default:
-            bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**")
-            break;
+        for (var key in authorRoles) {
+          if(authorRoles.hasOwnProperty(key)) {
+            if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+              userHasXMAS = true;
+            }
+          }
+        }
+
+        var assignXMASRole = function(){
+          var color = params[1];
+
+          switch(color) {
+            case 'red':
+              bot.addMemberToRole(msg.author, roles['XMAS:RED'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
+              });
+              break;
+            case 'green':
+              bot.addMemberToRole(msg.author, roles['XMAS:GREEN'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
+              });
+              break;
+            case 'blue':
+              bot.addMemberToRole(msg.author, roles['XMAS:BLUE'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            case 'gold':
+              bot.addMemberToRole(msg.author, roles['XMAS:GOLD'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            case 'darkred':
+              bot.addMemberToRole(msg.author, roles['XMAS:DARKRED'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            default:
+              bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
+              break;
+          }
+        }
+
+        if(userHasXMAS){
+          bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+        } else {
+          assignXMASRole();
         }
       } else {
         bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
@@ -396,6 +415,33 @@ Commands[ "setColor" ] = {
   }
 }
 
+Commands[ "unset" ] = {
+  oplevel: 1,
+  fn: function( bot, params, msg, msgServer ) {
+    if(params[1]) {
+      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+    } else {
+      var roles = getServerRoles(msg);
+      var authorRoles = msg.channel.server.rolesOfUser(msg.author);
+      var userHasXMAS = false;
+
+      for (var key in authorRoles) {
+        if(authorRoles.hasOwnProperty(key)) {
+          if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+            userHasXMAS = true;
+            bot.removeMemberFromRole(msg.author, authorRoles[key]);
+          }
+        }
+      }
+
+      if(userHasXMAS){
+        bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
+      } else {
+        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D");
+      }
+    }
+  }
+}
 
 
 // Array of all reactions.
@@ -419,7 +465,7 @@ colette.on("message", function (msg) {
 
   if(!msg.isPrivate) {
     // Global Variable across message reactions to get the server the message was taken from.
-    var msgServer = msg.author.server.name;
+    var msgServer = msg.channel.server.name;
   }
 
   // Commands
@@ -510,7 +556,7 @@ colette.on("messageUpdate", function (msg, formerMsg) {
  * === EVENT : User Addition to Server ===
  * @todo  Will soon send which server it happened on as well.
  */
-colette.on("serverNewMember", function (user) {
+colette.on("serverNewMember", function (server, user) {
   console.log("new user", user);
 
   // PM me about server removals adds.
@@ -579,7 +625,7 @@ function pmme(message) {
 
 // Function used to return channels for respective servers.
 function getServerChannel(serverName, channelName) {
-  return colette.getServer("name", serverName).getChannel("name", channelName);
+  return colette.servers.get("name", serverName).getChannel("name", channelName);
 }
 
 // Utility Function - download
