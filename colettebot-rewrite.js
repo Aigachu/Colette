@@ -122,14 +122,14 @@ colette.on("ready", function () {
 /* === The Juicy Stuff === */
 
 // Array of all commands.
-CommandPrefix = "!";
-Commands = [];
+var CommandPrefix = "!";
+var Commands = [];
 
 Commands[ "ping" ] = {
   oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
 
-    bot.sendMessage(msg.channel, "New, CLEAN pong. That's right, we're fancy now Aiga.");
+    pmme("New, CLEAN pong. That's right, we're fancy now Aiga.");
 
   }
 }
@@ -451,7 +451,7 @@ Commands[ "unset" ] = {
 
 
 // Array of all reactions.
-Reactions = [];
+var Reactions = [];
 
 Reactions[ "colette" ] = {
   oplevel: 1,
@@ -469,7 +469,7 @@ colette.on("message", function (msg) {
   // Log Messages for DEV purposes
   console.log(msg);
 
-  if(!msg.isPrivate) {
+  if(!msg.channel.recipient) {
     // Global Variable across message reactions to get the server the message was taken from.
     var msgServer = msg.channel.server.name;
   }
@@ -626,7 +626,7 @@ function isAdminMessage(message) {
 // PM admin (aka me)
 function pmme(message) {
   // Might be able to change this to a user for the channel resolvable.
-  colette.sendMessage(colette.getChannel("id", PM_CHANNEL_ID), message);
+  colette.sendMessage(colette.users.get("id", ADMIN_ID), message);
 }
 
 // Function used to return channels for respective servers.
