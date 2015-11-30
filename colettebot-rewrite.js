@@ -126,7 +126,7 @@ CommandPrefix = "!";
 Commands = [];
 
 Commands[ "ping" ] = {
-  oplevel: 0,
+  oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
 
     bot.sendMessage(msg.channel, "New, CLEAN pong. That's right, we're fancy now Aiga.");
@@ -319,7 +319,7 @@ Commands[ "loadEmo" ] = {
 }
 
 Commands[ "initEmo" ] = {
-  oplevel: 0,
+  oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
 
     Emotes = reloadEmotes();
@@ -329,7 +329,7 @@ Commands[ "initEmo" ] = {
 }
 
 Commands[ "aEmo" ] = {
-  oplevel: 0,
+  oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
 
     EmotesOn = true;
@@ -339,7 +339,7 @@ Commands[ "aEmo" ] = {
 }
 
 Commands[ "dEmo" ] = {
-  oplevel: 0,
+  oplevel: 1,
   fn: function( bot, params, msg, msgServer ) {
 
     EmotesOn = false;
@@ -350,7 +350,7 @@ Commands[ "dEmo" ] = {
 
 /* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
 Commands[ "setColor" ] = {
-  oplevel: 1,
+  oplevel: 0,
   fn: function( bot, params, msg, msgServer ) {
     if(params[2]) {
       bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
@@ -416,10 +416,10 @@ Commands[ "setColor" ] = {
 }
 
 Commands[ "unset" ] = {
-  oplevel: 1,
+  oplevel: 0,
   fn: function( bot, params, msg, msgServer ) {
     if(params[1]) {
-      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+      bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
     } else {
       var roles = getServerRoles(msg);
       var authorRoles = msg.channel.server.rolesOfUser(msg.author);
@@ -437,7 +437,7 @@ Commands[ "unset" ] = {
       if(userHasXMAS){
         bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
       } else {
-        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D");
+        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
       }
     }
   }
