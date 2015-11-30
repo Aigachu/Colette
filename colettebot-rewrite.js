@@ -449,6 +449,15 @@ Commands[ "unset" ] = {
   }
 }
 
+Commands[ "colorhelp" ] = {
+  oplevel: 0,
+  fn: function( bot, params, msg, msgServer ) {
+    if(msg.channel.id == '83017907335860224') {  
+      bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
+    }
+  }
+}
+
 
 // Array of all reactions.
 var Reactions = [];
@@ -478,7 +487,7 @@ colette.on("message", function (msg) {
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
       var params = msg.content.split(" ");
-      if(params[0] === CommandPrefix + key && msg.author.id !== colette.user.id) {
+      if(params[0].toUpperCase() === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
         // Check op level
         if(Commands[key].oplevel === 1) {
           if(isAdminMessage(msg)) {
