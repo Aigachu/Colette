@@ -95,6 +95,11 @@ var configs;
 // Command/Reactions Cooldowns
 var cooldowns = [];
 
+// Timeouts
+var timeout = [];
+var timeoutCount = [];
+
+// Nairo's Server ID.
 var NairoServ = '82343511336157184';
 
 // Server Configurations
@@ -103,7 +108,7 @@ var NairoServ = '82343511336157184';
 // Emotes Initiation
 var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders currently present.
 var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
-var EmotesAllowedServers = []; // Will be used to manage which servers have access to this feature.
+var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
 
 // Login
 colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
@@ -361,8 +366,6 @@ Commands[ "setColor" ] = {
           var authorRoles = msg.channel.server.rolesOfUser(msg.author);
           var userHasXMAS = false;
 
-          console.log(roles);
-
           for (var key in authorRoles) {
             if(authorRoles.hasOwnProperty(key)) {
               if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
@@ -452,7 +455,7 @@ Commands[ "unset" ] = {
 Commands[ "colorhelp" ] = {
   oplevel: 0,
   fn: function( bot, params, msg, msgServer ) {
-    if(msg.channel.id == '83017907335860224') {  
+    if(msg.channel.id == '83017907335860224') {
       bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
     }
   }
@@ -482,6 +485,9 @@ colette.on("message", function (msg) {
     // Global Variable across message reactions to get the server the message was taken from.
     var msgServer = msg.channel.server.name;
   }
+
+  // Timing out users
+
 
   // Commands
   for (var key in Commands) {
