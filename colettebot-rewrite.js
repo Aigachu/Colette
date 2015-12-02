@@ -487,7 +487,7 @@ colette.on("message", function (msg) {
   }
 
   if(msg.author.id != colette.user.id) {
-    // Timing out users
+    // Timing out users for spamming the same message 4 times
     if(!timeouts[msg.author.id + msg.content] || timeouts[msg.author.id + msg.content] == null) {
       timeouts[msg.author.id + msg.content] =  1;
     } else {
@@ -500,8 +500,8 @@ colette.on("message", function (msg) {
       console.log("cleared: " + msg.author.id + msg.content);
     }, 1000 * 10);
 
-    // Timeout user if they said the same msg 5 times.
-    if(timeouts[msg.author.id + msg.content] == 5) {
+    // Timeout user if they said the same msg 4 times.
+    if(timeouts[msg.author.id + msg.content] == 4) {
       // Reset timeout for this string + author
       timeouts[msg.author.id + msg.content] = null;
 
@@ -515,17 +515,17 @@ colette.on("message", function (msg) {
       }
       timeoutCounts[msg.author.id + "clear"] = setTimeout(function(){
         timeoutCounts[msg.author.id] = null;
-      }, 1000 * 60 * 5);
+      }, 1000 * 60 * 10);
 
       // Default duration
-      timeouts[msg.author + msg.content + "duration"] = 1000 * 5;
+      timeouts[msg.author + msg.content + "duration"] = 1000 * 60;
       var tiMessage = "HEY, <@" + msg.author.id + ">! NO SPAMMING! YOU'RE TIMED OUT FOR **1 MINUTE** FAM.";
 
       if(timeoutCounts[msg.author.id] == 2) {
-        timeouts[msg.author + msg.content + "duration"] = 1000 * 10;
+        timeouts[msg.author + msg.content + "duration"] = 1000 * 60 * 3;
         tiMessage = "Ah ah ah, <@" + msg.author.id + ">! Seems like you did it again! **3 minutes** this time.";
       } else if(timeoutCounts[msg.author.id] >= 3) {
-        timeouts[msg.author + msg.content + "duration"] = 1000 * 20;
+        timeouts[msg.author + msg.content + "duration"] = 1000 * 60 * 5;
         tiMessage = "Come on, <@" + msg.author.id + ">. -_- Don't make me do thisss againnn. **5 minutes**, okay?!";
       }
 
