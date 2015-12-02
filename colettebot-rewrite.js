@@ -96,8 +96,8 @@ var configs;
 var cooldowns = [];
 
 // Timeouts
-var timeout = [];
-var timeoutCount = [];
+var timeouts = [];
+var timeoutCounts = [];
 
 // Nairo's Server ID.
 var NairoServ = '82343511336157184';
@@ -111,7 +111,7 @@ var EmotesOn = false; // Will be used to manage toggling the emotes feature. Dis
 var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
 
 // Login
-colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
+colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -486,7 +486,66 @@ colette.on("message", function (msg) {
     var msgServer = msg.channel.server.name;
   }
 
-  // Timing out users
+  if(msg.author.id != colette.user.id) {
+    // Timing out users
+    if(!timeouts[msg.author.id + msg.content] || timeouts[msg.author.id + msg.content] == null) {
+      timeouts[msg.author.id + msg.content] =  1;
+    } else {
+      timeouts[msg.author.id + msg.content]++;
+      clearTimeout(timeouts[msg.author.id + msg.content + "clear"]);
+      timeouts[msg.author.id + msg.content + "clear"] = null;
+    }
+    timeouts[msg.author.id + msg.content + "clear"] = setTimeout(function(){
+      timeouts[msg.author.id + msg.content] = null;
+      console.log("cleared: " + msg.author.id + msg.content);
+    }, 1000 * 10);
+
+    // Timeout user if they said the same msg 5 times.
+    if(timeouts[msg.author.id + msg.content] == 5) {
+      // Reset timeout for this string + author
+      timeouts[msg.author.id + msg.content] = null;
+
+      // Set timeout count
+      if(!timeoutCounts[msg.author.id] || timeoutCounts[msg.author.id] == null) {
+        timeoutCounts[msg.author.id] =  1;
+      } else {
+        timeoutCounts[msg.author.id]++;
+        clearTimeout(timeoutCounts[msg.author.id + "clear"]);
+        timeoutCounts[msg.author.id + "clear"] = null;
+      }
+      timeoutCounts[msg.author.id + "clear"] = setTimeout(function(){
+        timeoutCounts[msg.author.id] = null;
+      }, 1000 * 60 * 5);
+
+      // Default duration
+      timeouts[msg.author + msg.content + "duration"] = 1000 * 5;
+      var tiMessage = "HEY, <@" + msg.author.id + ">! NO SPAMMING! YOU'RE TIMED OUT FOR **1 MINUTE** FAM.";
+
+      if(timeoutCounts[msg.author.id] == 2) {
+        timeouts[msg.author + msg.content + "duration"] = 1000 * 10;
+        tiMessage = "Ah ah ah, <@" + msg.author.id + ">! Seems like you did it again! **3 minutes** this time.";
+      } else if(timeoutCounts[msg.author.id] >= 3) {
+        timeouts[msg.author + msg.content + "duration"] = 1000 * 20;
+        tiMessage = "Come on, <@" + msg.author.id + ">. -_- Don't make me do thisss againnn. **5 minutes**, okay?!";
+      }
+
+      var tRoles = getServerRoles(msg);
+      colette.addMemberToRole(msg.author, tRoles['Timeout'], function(error){
+        colette.sendMessage(msg.channel, "HEY, <@" + msg.author.id + ">! NO SPAMMING! YOU'RE TIMED OUT FOR 1 MINUTE FAM.");
+      });
+      setTimeout(function(){
+        var tAuthorRoles = msg.channel.server.rolesOfUser(msg.author);
+
+        for (var key in tAuthorRoles) {
+          if(tAuthorRoles.hasOwnProperty(key)) {
+            if(tAuthorRoles[key]['name'] === 'Timeout'){
+              colette.removeMemberFromRole(msg.author, tAuthorRoles[key]);
+            }
+          }
+        }
+      }, timeouts[msg.author + msg.content + "duration"]) // Timeout duration
+    }
+  }
 
 
   // Commands
