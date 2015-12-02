@@ -98,6 +98,7 @@ var cooldowns = [];
 // Timeouts
 var timeouts = [];
 var timeoutCounts = [];
+var tMsgCache = [];
 
 // Nairo's Server ID.
 var NairoServ = '82343511336157184';
@@ -490,12 +491,15 @@ colette.on("message", function (msg) {
     // Timing out users for spamming the same message 4 times
     if(!timeouts[msg.author.id + msg.content] || timeouts[msg.author.id + msg.content] == null) {
       timeouts[msg.author.id + msg.content] =  1;
+      tMsgCache[msg.author.id + msg.content] = [];
     } else {
       timeouts[msg.author.id + msg.content]++;
+      tMsgCache[msg.author.id + msg.content].push(msg);
       clearTimeout(timeouts[msg.author.id + msg.content + "clear"]);
       timeouts[msg.author.id + msg.content + "clear"] = null;
     }
     timeouts[msg.author.id + msg.content + "clear"] = setTimeout(function(){
+      tMsgCache[msg.author.id + msg.content] = [];
       timeouts[msg.author.id + msg.content] = null;
       console.log("cleared: " + msg.author.id + msg.content);
     }, 1000 * 10);
@@ -516,6 +520,11 @@ colette.on("message", function (msg) {
       timeoutCounts[msg.author.id + "clear"] = setTimeout(function(){
         timeoutCounts[msg.author.id] = null;
       }, 1000 * 60 * 10);
+
+      // Delete messages
+      for(var key in tMsgCache[msg.author.id + msg.content]) {
+        colette.deleteMessage(tMsgCache[msg.author.id + msg.content][key]);
+      }
 
       // Default duration
       timeouts[msg.author + msg.content + "duration"] = 1000 * 60;
