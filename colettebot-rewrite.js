@@ -60,7 +60,7 @@ var twitch = new TwitchObject(twitch_id);
 // @todo
 
 // Login
-colette.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -126,7 +126,7 @@ var EmotesAllowedServers = []; // @todo Will be used to manage which servers hav
 var notify_mentions = true;
 
 // Auto Timeouts Enabling
-var auto_time = false;
+var auto_time = true; // Enabled by default
 
 
 // Array of all commands.
@@ -400,7 +400,10 @@ Commands[ "timeout" ] = {
     }
   }
 }
-// NOT YET TESTED
+
+// Must finish this command by adding a more persistent cache.
+// Messages are not getting deleted.
+// ONLY PURGES CACHE MESSAGES
 Commands[ "purge" ] = {
   oplevel: 1,
   allowed_channels: 'all',
@@ -421,7 +424,6 @@ Commands[ "purge" ] = {
           colette.deleteMessage(d[key]);
         }
       }
-
     }
   }
 }
@@ -518,26 +520,24 @@ Commands[ "unset" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    if(msg.channel.id != NAIFU_BOT_BURGHAL) {
-      if(params[1]) {
-        bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
-      } else {
-        var userHasXMAS = false;
+    if(params[1]) {
+      bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
+    } else {
+      var userHasXMAS = false;
 
-        for (var key in authorRoles) {
-          if(authorRoles.hasOwnProperty(key)) {
-            if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-              userHasXMAS = true;
-              bot.removeMemberFromRole(msg.author, authorRoles[key]);
-            }
+      for (var key in authorRoles) {
+        if(authorRoles.hasOwnProperty(key)) {
+          if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+            userHasXMAS = true;
+            bot.removeMemberFromRole(msg.author, authorRoles[key]);
           }
         }
+      }
 
-        if(userHasXMAS){
-          bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
-        } else {
-          bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-        }
+      if(userHasXMAS){
+        bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
+      } else {
+        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
       }
     }
   }
@@ -547,9 +547,7 @@ Commands[ "colorhelp" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    if(msg.channel.id != NAIFU_BOT_BURGHAL) {
-      bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
-    }
+    bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
   }
 }
 
@@ -559,7 +557,7 @@ var Reactions = [];
 
 Reactions[ "colette" ] = {
   oplevel: 1,
-  allowed_channels: [AWORLD_COLETTE],
+  allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
   fn: function( bot, msg ) {
 
     bot.sendMessage(msg.channel, "Hm? You called?");
@@ -590,7 +588,7 @@ colette.on("message", function (msg) {
         msg_cc[msg.author.id] = setTimeout(function(){
           // After a delay, clear the cache.
           msg_c[msg.author.id] = null;
-        }, 1000 * 20);
+        }, 1000 * 30);
       }
 
       // Add message to the user's message cache.
