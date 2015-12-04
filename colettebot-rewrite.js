@@ -400,21 +400,28 @@ Commands[ "timeout" ] = {
     }
   }
 }
-
-// coming soon...
+// NOT YET TESTED
 Commands[ "purge" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[3]) {
-      //bot.sendMessage( colette.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!timeout** command only accepts 2 arguments. Tag the user you want to time out, and then the number of seconds!\n\nExample: `!timeout @Colette 10`");
-
+      bot.sendMessage( colette.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!purge** command only accepts 2 arguments. Tag the user you want to time out, and then the number of messages!\n\nExample: `!timeout @Colette 10`");
     } else {
-      //var culprit = params[1];
-      //var duration = params[2];
+      colette.deleteMessage(msg);
+      var culprit = params[1];
+      var n = params[2];
 
-      //console.log(culprit);
-      //console.log(duration);
+      // If cache exists clear last messages
+      if(msg_c[culprit] != null) {
+        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - n, 1));
+
+        // delete spam
+        for(var key in d) {
+          colette.deleteMessage(d[key]);
+        }
+      }
+
     }
   }
 }
