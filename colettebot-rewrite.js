@@ -60,7 +60,7 @@ var twitch = new TwitchObject(twitch_id);
 // @todo
 
 // Login
-colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
+colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -150,6 +150,15 @@ Commands[ "pong" ] = {
 
     bot.sendMessage(msg.channel, "New, CLEAN ping. That's right, we're fancy now Aiga.");
 
+  }
+}
+
+Commands[ "gcid" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.deleteMessage(msg);
+    bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the **" + msg.channel + "** channel:\n\n**" + msg.channel.id + "**");
   }
 }
 
@@ -447,6 +456,76 @@ Commands[ "deTo" ] = {
     auto_time = false;
     bot.sendMessage(msg.channel, "Turning off automatic timeouts...:(");
 
+  }
+}
+
+Commands[ "rolldice" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    var roll = Math.floor(Math.random() * 6) + 1;
+
+    var roll_types = [];
+    roll_types.push({
+      message: "_rolls the die normally_",
+      timeout: 1
+    });
+    roll_types.push({
+      message: "_rolls the die violently_\n_the die falls on the ground_",
+      timeout: 2
+    });
+    roll_types.push({
+      message: "_accidentally drops the die on the ground while getting ready_\nOops! Still counts right...?",
+      timeout: 2
+    });
+    roll_types.push({
+      message: "_spins the die_\nWait for it...",
+      timeout: 5
+    });
+
+    var rand = roll_types[Math.floor(Math.random() * roll_types.length)];
+
+    bot.sendMessage(msg.channel, rand.message);
+    bot.startTyping(msg.channel);
+
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, "<@" + msg.author.id + "> rolled a **" + roll + "** !");
+      bot.stopTyping(msg.channel);
+    }, 1000 * rand.timeout);
+  }
+}
+
+Commands[ "coinflip" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    var flip = Math.floor(Math.random() * 2) + 1;
+
+    flip = ((flip == 1) ? 'Heads' : 'Tails');
+
+    var flip_types = [];
+    flip_types.push({
+      message: "_accidentally drops the coin on the ground_\n\nOops! ;~; Still counts right?",
+      timeout: 2
+    });
+    flip_types.push({
+      message: "_flips the coin normally_",
+      timeout: 1
+    });
+    flip_types.push({
+      message: "_spins the coin_\nWait for it...",
+      timeout: 5
+    });
+
+    var rand = flip_types[Math.floor(Math.random() * flip_types.length)];
+
+    bot.sendMessage(msg.channel, rand.message);
+    bot.startTyping(msg.channel);
+
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, "<@" + msg.author.id + "> got **" + flip + "** !");
+      bot.stopTyping(msg.channel);
+    }, 1000 * rand.timeout);
   }
 }
 
