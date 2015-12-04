@@ -22,18 +22,25 @@ var nconf = require('nconf');
 
 /* === Configurations === */
 
-// discord.js
-// Uses the discord.js module made by hydrabolt.
-// This instantiates a Discord Client that the bot uses.
-// @TODO - FUNCTIONS DOCUMENTATION
+/**
+ * discord.js
+ * Uses the discord.js module made by hydrabolt.
+ * @DOCU: https://discordjs.readthedocs.org/en/latest/
+ */
 
-// var Auth = require("./auth.json"); // @TODO JSON STORAGE
+// This instantiates a Discord Client that the bot uses.
 var colette = new Discord.Client();
 
-// Twitch
-// Access to twitch module & functions found in twitch.js
-// Comment if you aren't using twitch functionality.
-// @TODO - FUNCTIONS DOCUMENTATION
+// Authentication JSON
+// @todo store authentication in json file
+// var Auth = require("./auth.json"); // @TODO JSON STORAGE
+
+/**
+ * Twitch API
+ * Access to twitch module & functions found in twitch.js
+ * Comment if you aren't using twitch functionality.
+ * @todo : DOCUMENTATION
+ */
 
 /*
   Twitch Application Client ID
@@ -44,72 +51,13 @@ var colette = new Discord.Client();
 var twitch_id = 'tn2tqa6lnu7gj3pl5h680dc40sbv5r2';
 
 // Instantiate Twitch Object
-
 var twitch = new TwitchObject(twitch_id);
 
 
 /********************************************************************************************/
 
-/* === Variables === */
-
-// Define Interval Array Variable
-var stream_check_interval_ids = [];
-
-// Admin account to restrict Bot commands!
-// There are ways to get this ID ;)
-var ADMIN_ID = '77517077325287424'; // My account ID <3
-var PM_CHANNEL_ID = '83297162842079232'; // My pm channel ID so colette can PM me <3
-
-// Twitch Announcement Channel
-var ANN_CHANNEL = 'announcements';
-
-// General Channel
-var GENERAL_CHANNEL = 'general';
-
-// Notifications
-var notify_mentions = true;
-
 /* === Configurations === */
-// @todo replace variables when this is complete.
-
-// Attempt to load configuration file.
-// If it fails, set default configurations and create configuration file.
-var configs;
-
-// try {
-//   var data = fs.readFileSync('configurations/config.json');
-// } catch (err) {
-//   // console.log(err);
-//   console.log("Configuration file not found. Creating...");
-// }
-
-// try {
-//   configs = JSON.parse(data);
-//   console.log(configs);
-// }
-// catch (err) {
-//   console.log('There has been an error parsing your JSON.')
-//   console.log(err);
-// }
-
-// Command/Reactions Cooldowns
-var cooldowns = [];
-
-// Timeouts
-var timeouts = [];
-var timeoutCounts = [];
-var tMsgCache = [];
-
-// Nairo's Server ID.
-var NairoServ = '82343511336157184';
-
-// Server Configurations
 // @todo
-
-// Emotes Initiation
-var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders currently present.
-var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
-var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
 
 // Login
 colette.login("aigabot2@gmail.com", "xu8h7gy@")
@@ -127,13 +75,68 @@ colette.on("ready", function () {
 
 /* === The Juicy Stuff === */
 
+/* === Variables === */
+
+/* == Server Variables  == */
+// ANOTHER WORLD
+// COLETTE TEST CHANNEL
+var AWORLD_COLETTE = '103228407290003456';
+
+// NAIFUS
+var NAIFU_SERVER_ID = '82343511336157184';
+// BOTBURGHAL CHANNEL
+var NAIFU_BOT_BURGHAL = '83017907335860224';
+
+
+// Define Interval Array Variable
+var stream_check_interval_ids = [];
+
+// Admin account to restrict Bot commands!
+// There are ways to get this ID ;)
+var ADMIN_ID = '77517077325287424'; // My account ID <3
+var PM_CHANNEL_ID = '83297162842079232'; // My pm channel ID so colette can PM me <3
+
+// Default Announcement Channel
+var ANN_CHANNEL = 'announcements';
+
+// Default General Channel
+var GENERAL_CHANNEL = 'general';
+
+// Command/Reactions Cooldowns
+var cooldowns = {};
+
+// Chat Timeouts
+var timeouts = {};
+var timeoutCounts = {};
+var msg_c = []; // user message cache
+var msg_cc = []; // message cache clear variable. holds timeout
+var spam_c = []; // spam message cache
+var spam_cc = []; // spam cache clear variable. holds timeout
+var qspam_c = []; // quickspam message cache
+var qspam_cc = []; // quickspam cache clear variable. holds timeout
+
+// Emotes Initiation
+var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders currently present.
+var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
+var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
+
+/* == Features == */
+
+// Notifications Enabling
+var notify_mentions = true;
+
+// Auto Timeouts Enabling
+var auto_time = false;
+
+
 // Array of all commands.
 var CommandPrefix = "!";
 var Commands = [];
 
 Commands[ "ping" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     pmme("New, CLEAN pong. That's right, we're fancy now Aiga.");
 
@@ -142,7 +145,8 @@ Commands[ "ping" ] = {
 
 Commands[ "pong" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     bot.sendMessage(msg.channel, "New, CLEAN ping. That's right, we're fancy now Aiga.");
 
@@ -151,7 +155,8 @@ Commands[ "pong" ] = {
 
 Commands[ "setName" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var newName = params[1];
       bot.setUsername(newName).catch(function(err){
@@ -166,7 +171,8 @@ Commands[ "setName" ] = {
 
 Commands[ "setGeneral" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       GENERAL_CHANNEL = params[1];
       bot.sendMessage( msg.channel, "Gotcha! The general channel has been changed to **" + GENERAL_CHANNEL + "**!");
@@ -178,7 +184,8 @@ Commands[ "setGeneral" ] = {
 
 Commands[ "joinServer" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var resolvable = params[1];
       bot.joinServer(resolvable);
@@ -193,7 +200,8 @@ Commands[ "joinServer" ] = {
 
 Commands[ "setAnn" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       ANN_CHANNEL = params[1];
       bot.sendMessage( msg.channel, "Gotcha! The announcement channel has been changed to **" + ANN_CHANNEL + "**!");
@@ -205,7 +213,8 @@ Commands[ "setAnn" ] = {
 
 Commands[ "ann" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var twitch_channel = params[1];
 
@@ -225,7 +234,8 @@ Commands[ "ann" ] = {
 
 Commands[ "autoAnn" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var twitch_channel = params[1];
 
@@ -253,7 +263,8 @@ Commands[ "autoAnn" ] = {
 
 Commands[ "deAutoAnn" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var twitch_channel = params[1];
       // @todo clear all if no argument
@@ -276,7 +287,8 @@ Commands[ "deAutoAnn" ] = {
 
 Commands[ "loadEmo" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var twitch_channel = params[1];
       twitch.getEmotes(twitch_channel, function( data ) {
@@ -326,7 +338,8 @@ Commands[ "loadEmo" ] = {
 
 Commands[ "initEmo" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     Emotes = reloadEmotes();
     bot.sendMessage(msg.channel, "Emotes reloaded!");
@@ -334,22 +347,96 @@ Commands[ "initEmo" ] = {
   }
 }
 
-Commands[ "aEmo" ] = {
+Commands[ "enEmo" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     EmotesOn = true;
-    bot.sendMessage(msg.channel, "Activated emotes.");
+    bot.sendMessage(msg.channel, "Activated twitch emotes! ");
 
   }
 }
 
-Commands[ "dEmo" ] = {
+Commands[ "deEmo" ] = {
   oplevel: 1,
-  fn: function( bot, params, msg, msgServer ) {
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     EmotesOn = false;
-    bot.sendMessage(msg.channel, "Activated emotes.");
+    bot.sendMessage(msg.channel, "Deactivated twitch emotes.");
+
+  }
+}
+
+Commands[ "timeout" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[3]) {
+      bot.sendMessage( bot.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!timeout** command only accepts 2 arguments. Tag the user you want to time out, and then the number of seconds!\n\nExample: `!timeout @Colette 10`");
+    } else {
+      colette.deleteMessage(msg);
+      var culprit = params[1].slice(2, -1);
+      var duration = params[2];
+
+      bot.addMemberToRole(bot.users.get("id", culprit), serverRoles['Timeout'], function(error){
+        bot.sendMessage(msg.channel, "Timed out <@" + culprit + "> ! RIP.");
+      });
+
+      // If cache exists clear last messages
+      if(msg_c[culprit] != null) {
+        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - 10, 1));
+
+        // delete spam
+        for(var key in d) {
+          colette.deleteMessage(d[key]);
+        }
+      }
+
+      setTimeout(function(){
+        bot.removeMemberFromRole(bot.users.get("id", culprit), serverRoles['Timeout']);
+      }, 1000 * duration);
+    }
+  }
+}
+
+// coming soon...
+Commands[ "purge" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[3]) {
+      //bot.sendMessage( colette.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!timeout** command only accepts 2 arguments. Tag the user you want to time out, and then the number of seconds!\n\nExample: `!timeout @Colette 10`");
+
+    } else {
+      //var culprit = params[1];
+      //var duration = params[2];
+
+      //console.log(culprit);
+      //console.log(duration);
+    }
+  }
+}
+
+Commands[ "enTo" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    auto_time = true;
+    bot.sendMessage(msg.channel, "Turning on automatic timeouts...Time to purge! :fist:");
+
+  }
+}
+
+Commands[ "deTo" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    auto_time = false;
+    bot.sendMessage(msg.channel, "Turning off automatic timeouts...:(");
 
   }
 }
@@ -357,67 +444,64 @@ Commands[ "dEmo" ] = {
 /* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
 Commands[ "setColor" ] = {
   oplevel: 0,
-  fn: function( bot, params, msg, msgServer ) {
-    if(msg.channel.id == '83017907335860224') {
-      if(params[2]) {
-        bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-      } else {
-        if(params[1]) {
-          var roles = getServerRoles(msg);
-          var authorRoles = msg.channel.server.rolesOfUser(msg.author);
-          var userHasXMAS = false;
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[2]) {
+      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+    } else {
+      if(params[1]) {
+        var userHasXMAS = false;
 
-          for (var key in authorRoles) {
-            if(authorRoles.hasOwnProperty(key)) {
-              if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-                userHasXMAS = true;
-              }
+        for (var key in authorRoles) {
+          if(authorRoles.hasOwnProperty(key)) {
+            if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+              userHasXMAS = true;
             }
           }
-
-          var assignXMASRole = function(){
-            var color = params[1];
-
-            switch(color) {
-              case 'red':
-                bot.addMemberToRole(msg.author, roles['XMAS:RED'], function(error){
-                  bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
-                });
-                break;
-              case 'green':
-                bot.addMemberToRole(msg.author, roles['XMAS:GREEN'], function(error){
-                  bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
-                });
-                break;
-              case 'blue':
-                bot.addMemberToRole(msg.author, roles['XMAS:BLUE'], function(error){
-                  bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
-                })
-                break;
-              case 'gold':
-                bot.addMemberToRole(msg.author, roles['XMAS:GOLD'], function(error){
-                  bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
-                })
-                break;
-              case 'darkred':
-                bot.addMemberToRole(msg.author, roles['XMAS:DARKRED'], function(error){
-                  bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
-                })
-                break;
-              default:
-                bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
-                break;
-            }
-          }
-
-          if(userHasXMAS){
-            bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
-          } else {
-            assignXMASRole();
-          }
-        } else {
-          bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
         }
+
+        var assignXMASRole = function(){
+          var color = params[1];
+
+          switch(color) {
+            case 'red':
+              bot.addMemberToRole(msg.author, serverRoles['XMAS:RED'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
+              });
+              break;
+            case 'green':
+              bot.addMemberToRole(msg.author, serverRoles['XMAS:GREEN'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
+              });
+              break;
+            case 'blue':
+              bot.addMemberToRole(msg.author, serverRoles['XMAS:BLUE'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            case 'gold':
+              bot.addMemberToRole(msg.author, serverRoles['XMAS:GOLD'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            case 'darkred':
+              bot.addMemberToRole(msg.author, serverRoles['XMAS:DARKRED'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
+              })
+              break;
+            default:
+              bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
+              break;
+          }
+        }
+
+        if(userHasXMAS){
+          bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+        } else {
+          assignXMASRole();
+        }
+      } else {
+        bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
       }
     }
   }
@@ -425,13 +509,12 @@ Commands[ "setColor" ] = {
 
 Commands[ "unset" ] = {
   oplevel: 0,
-  fn: function( bot, params, msg, msgServer ) {
-    if(msg.channel.id == '83017907335860224') {
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(msg.channel.id != NAIFU_BOT_BURGHAL) {
       if(params[1]) {
         bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
       } else {
-        var roles = getServerRoles(msg);
-        var authorRoles = msg.channel.server.rolesOfUser(msg.author);
         var userHasXMAS = false;
 
         for (var key in authorRoles) {
@@ -455,8 +538,9 @@ Commands[ "unset" ] = {
 
 Commands[ "colorhelp" ] = {
   oplevel: 0,
-  fn: function( bot, params, msg, msgServer ) {
-    if(msg.channel.id == '83017907335860224') {
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(msg.channel.id != NAIFU_BOT_BURGHAL) {
       bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
     }
   }
@@ -468,6 +552,7 @@ var Reactions = [];
 
 Reactions[ "colette" ] = {
   oplevel: 1,
+  allowed_channels: [AWORLD_COLETTE],
   fn: function( bot, msg ) {
 
     bot.sendMessage(msg.channel, "Hm? You called?");
@@ -480,81 +565,107 @@ Reactions[ "colette" ] = {
  */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
-  console.log(msg);
+  // console.log(msg);
 
   if(!msg.channel.recipient) {
     // Global Variable across message reactions to get the server the message was taken from.
-    var msgServer = msg.channel.server.name;
+    var msgServer   = msg.channel.server.name;
+    var serverRoles = getServerRoles(msg);
+    var authorRoles = msg.channel.server.rolesOfUser(msg.author);
   }
 
-  if(msg.author.id != colette.user.id) {
-    // Timing out users for spamming the same message 4 times
-    if(!timeouts[msg.author.id + msg.content] || timeouts[msg.author.id + msg.content] == null) {
-      timeouts[msg.author.id + msg.content] =  1;
-      tMsgCache[msg.author.id + msg.content] = [];
-    } else {
-      timeouts[msg.author.id + msg.content]++;
-      tMsgCache[msg.author.id + msg.content].push(msg);
-      clearTimeout(timeouts[msg.author.id + msg.content + "clear"]);
-      timeouts[msg.author.id + msg.content + "clear"] = null;
-    }
-    timeouts[msg.author.id + msg.content + "clear"] = setTimeout(function(){
-      tMsgCache[msg.author.id + msg.content] = [];
-      timeouts[msg.author.id + msg.content] = null;
-      console.log("cleared: " + msg.author.id + msg.content);
-    }, 1000 * 10);
-
-    // Timeout user if they said the same msg 4 times.
-    if(timeouts[msg.author.id + msg.content] == 4) {
-      // Reset timeout for this string + author
-      timeouts[msg.author.id + msg.content] = null;
-
-      // Set timeout count
-      if(!timeoutCounts[msg.author.id] || timeoutCounts[msg.author.id] == null) {
-        timeoutCounts[msg.author.id] =  1;
-      } else {
-        timeoutCounts[msg.author.id]++;
-        clearTimeout(timeoutCounts[msg.author.id + "clear"]);
-        timeoutCounts[msg.author.id + "clear"] = null;
-      }
-      timeoutCounts[msg.author.id + "clear"] = setTimeout(function(){
-        timeoutCounts[msg.author.id] = null;
-      }, 1000 * 60 * 10);
-
-      // Delete messages
-      for(var key in tMsgCache[msg.author.id + msg.content]) {
-        colette.deleteMessage(tMsgCache[msg.author.id + msg.content][key]);
+  // Automatic Timeouts
+  if(auto_time) {
+    if(msg.author.id != colette.user.id) {
+      // User Message Cache
+      if(msg_c[msg.author.id] == null) { // If user's message cache is cleared/empty
+        msg_c[msg.author.id] = []; // Initiate message cache.
+        msg_cc[msg.author.id] = setTimeout(function(){
+          // After a delay, clear the cache.
+          msg_c[msg.author.id] = null;
+        }, 1000 * 20);
       }
 
-      // Default duration
-      timeouts[msg.author + msg.content + "duration"] = 1000 * 60;
-      var tiMessage = "HEY, <@" + msg.author.id + ">! NO SPAMMING! YOU'RE TIMED OUT FOR **1 MINUTE** FAM.";
+      // Add message to the user's message cache.
+      msg_c[msg.author.id].push(msg);
 
-      if(timeoutCounts[msg.author.id] == 2) {
-        timeouts[msg.author + msg.content + "duration"] = 1000 * 60 * 3;
-        tiMessage = "Ah ah ah, <@" + msg.author.id + ">! Seems like you did it again! **3 minutes** this time.";
-      } else if(timeoutCounts[msg.author.id] >= 3) {
-        timeouts[msg.author + msg.content + "duration"] = 1000 * 60 * 5;
-        tiMessage = "Come on, <@" + msg.author.id + ">. -_- Don't make me do thisss againnn. **5 minutes**, okay?!";
-      }
+      // If the message cache is bigger than just 1 message.
+      if(msg_c[msg.author.id].length > 1) {
 
-      var tRoles = getServerRoles(msg);
-      colette.addMemberToRole(msg.author, tRoles['Timeout'], function(error){
-        colette.sendMessage(msg.channel, "HEY, <@" + msg.author.id + ">! NO SPAMMING! YOU'RE TIMED OUT FOR 1 MINUTE FAM.");
-      });
-      setTimeout(function(){
-        var tAuthorRoles = msg.channel.server.rolesOfUser(msg.author);
+        // QuickSpam Functionality
+        // if(qspam_c[msg.author.id] == null) {
+        //   qspam_c[msg.author.id] = [];
+        // }
 
-        for (var key in tAuthorRoles) {
-          if(tAuthorRoles.hasOwnProperty(key)) {
-            if(tAuthorRoles[key]['name'] === 'Timeout'){
-              colette.removeMemberFromRole(msg.author, tAuthorRoles[key]);
+        // qspam_c[msg.author.id].push(msg);
+
+        // qspam_cc = setTimeout(function(){
+        //   qspam_c[msg.author.id] = null;
+        // }, 1500);
+
+        // if(qspam_c[msg.author.id].length >= 4) {
+        //   // Assign 'Timeout' role.
+        //   colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+        //   colette.sendMessage(msg.channel, "Slllooowww dowwwn~ <@" + msg.author.id + "> ^_^");
+        //   colette.sendFile(msg.channel, 'judgement.png', 'judgement.png');
+
+        //   // delete spam
+        //   for(var key in qspam_c[msg.author.id]) {
+        //     colette.deleteMessage(qspam_c[msg.author.id][key]);
+        //   }
+
+        //   spam_c[msg.author.id] = null;
+        //   qspam_c[msg.author.id] = null;
+        //   setTimeout(function(){
+        //     colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+        //   }, 1000 * 5);
+        //   clearTimeout(spam_cc[msg.author.id]);
+        //   clearTimeout(qspam_cc[msg.author.id]);
+        // }
+
+        // Normal Spam Functionality.
+        // Push to spam array if it's same message as last
+        var lastMsg = msg_c[msg.author.id][msg_c[msg.author.id].length - 2];
+
+        if(msg.content === lastMsg.content) {
+          if(spam_c[msg.author.id] == null) {
+            spam_c[msg.author.id] = [];
+            // push the first message into this array if it must get deleted
+            //spam_c[msg.author.id].push(lastMsg);
+          }
+
+          clearTimeout(spam_cc[msg.author.id]);
+          spam_cc[msg.author.id] = null;
+          spam_cc[msg.author.id] = setTimeout(function(){
+            spam_c[msg.author.id] = null;
+          }, 1000 * 5);
+          spam_c[msg.author.id].push(msg);
+
+          if(spam_c[msg.author.id].length >= 4) {
+            // Assign 'Timeout' role.
+            colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+            colette.sendMessage(msg.channel, "Oops! My hands slipped <@" + msg.author.id + "> :P !");
+            colette.sendFile(msg.channel, 'judgement.png', 'judgement.png');
+
+            // delete spam
+            for(var key in spam_c[msg.author.id]) {
+              colette.deleteMessage(spam_c[msg.author.id][key]);
             }
+            spam_c[msg.author.id] = null;
+            msg_c[msg.author.id] = null;
+            setTimeout(function(){
+              colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+            }, 1000 * 10);
+            clearTimeout(spam_cc[msg.author.id]);
           }
         }
-      }, timeouts[msg.author + msg.content + "duration"]) // Timeout duration
+      }
+
+      // Check if last 5 items had the same content
+
     }
   }
+
 
 
   // Commands
@@ -562,16 +673,33 @@ colette.on("message", function (msg) {
     if (Commands.hasOwnProperty(key)) {
       var params = msg.content.split(" ");
       if(params[0].toUpperCase() === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
-        // Check op level
-        if(Commands[key].oplevel === 1) {
-          if(isAdminMessage(msg)) {
+        // Check allowed channels
+        if(Commands[key].allowed_channels === 'all') {
+          // Check op level
+          if(Commands[key].oplevel === 1) {
+            if(isAdminMessage(msg)) {
+              // Run the command's function.
+              Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
+            }
+          } else {
             // Run the command's function.
-            Commands[key].fn(colette, params, msg, msgServer);
+            var params = msg.content.split(" ");
+            Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
           }
         } else {
-          // Run the command's function.
-          var params = msg.content.split(" ");
-          Commands[key].fn(colette, params, msg, msgServer);
+          if(Commands[key].allowed_channels.indexOf(msg.channel.id) > -1) {
+            // Check op level
+            if(Commands[key].oplevel === 1) {
+              if(isAdminMessage(msg)) {
+                // Run the command's function.
+                Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
+              }
+            } else {
+              // Run the command's function.
+              var params = msg.content.split(" ");
+              Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
+            }
+          }
         }
       }
     }
@@ -583,16 +711,32 @@ colette.on("message", function (msg) {
     if (Reactions.hasOwnProperty(key)) {
       var keygex = new RegExp(key, "i");
       if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
-        // Check op level
-        if(Reactions[key].oplevel === 1) {
-          if(isAdminMessage(msg)) {
+        if(Reactions[key].allowed_channels === 'all') {
+          // Check op level
+          if(Reactions[key].oplevel === 1) {
+            if(isAdminMessage(msg)) {
+              // Run the command's function.
+              Reactions[key].fn(colette, msg);
+            }
+          }
+          else {
             // Run the command's function.
             Reactions[key].fn(colette, msg);
           }
-        }
-        else {
-          // Run the command's function.
-          Reactions[key].fn(colette, msg);
+        } else {
+          if(Reactions[key].allowed_channels.indexOf(msg.channel.id) > -1) {
+            // Check op level
+            if(Reactions[key].oplevel === 1) {
+              if(isAdminMessage(msg)) {
+                // Run the command's function.
+                Reactions[key].fn(colette, msg);
+              }
+            }
+            else {
+              // Run the command's function.
+              Reactions[key].fn(colette, msg);
+            }
+          }
         }
       }
     }
