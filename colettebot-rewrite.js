@@ -641,9 +641,19 @@ var Reactions = [];
 Reactions[ "colette" ] = {
   oplevel: 1,
   allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
-  fn: function( bot, msg ) {
+  fn: function( bot, msg, msgServer ) {
 
     bot.sendMessage(msg.channel, "Hm? You called?");
+
+  }
+}
+
+Reactions[ "aiga" ] = {
+  oplevel: 1,
+  allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  fn: function( bot, msg, msgServer ) {
+
+    pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name +"**\nMessage : _\""+ msg.content +"\"_");
 
   }
 }
@@ -804,12 +814,12 @@ colette.on("message", function (msg) {
           if(Reactions[key].oplevel === 1) {
             if(isAdminMessage(msg)) {
               // Run the command's function.
-              Reactions[key].fn(colette, msg);
+              Reactions[key].fn(colette, msg, msgServer);
             }
           }
           else {
             // Run the command's function.
-            Reactions[key].fn(colette, msg);
+            Reactions[key].fn(colette, msg, msgServer);
           }
         } else {
           if(Reactions[key].allowed_channels.indexOf(msg.channel.id) > -1) {
@@ -817,12 +827,12 @@ colette.on("message", function (msg) {
             if(Reactions[key].oplevel === 1) {
               if(isAdminMessage(msg)) {
                 // Run the command's function.
-                Reactions[key].fn(colette, msg);
+                Reactions[key].fn(colette, msg, msgServer);
               }
             }
             else {
               // Run the command's function.
-              Reactions[key].fn(colette, msg);
+              Reactions[key].fn(colette, msg, msgServer);
             }
           }
         }
