@@ -648,11 +648,11 @@ Reactions[ "colette" ] = {
   }
 }
 
-Reactions[ "aiga" ] = {
+Reactions[ "Aiga" ] = {
   oplevel: 1,
   allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
   fn: function( bot, msg, msgServer ) {
-
+    // @todo include time of mention in EST
     pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name +"**\nMessage : _\""+ msg.content +"\"_");
 
   }
@@ -691,35 +691,35 @@ colette.on("message", function (msg) {
       if(msg_c[msg.author.id].length > 1) {
 
         // QuickSpam Functionality
-        // if(qspam_c[msg.author.id] == null) {
-        //   qspam_c[msg.author.id] = [];
-        // }
+        if(qspam_c[msg.author.id] == null) {
+          qspam_c[msg.author.id] = [];
+        }
 
-        // qspam_c[msg.author.id].push(msg);
+        qspam_c[msg.author.id].push(msg);
 
-        // qspam_cc = setTimeout(function(){
-        //   qspam_c[msg.author.id] = null;
-        // }, 1500);
+        qspam_cc = setTimeout(function(){
+          qspam_c[msg.author.id] = null;
+        }, 400);
 
-        // if(qspam_c[msg.author.id].length >= 4) {
-        //   // Assign 'Timeout' role.
-        //   colette.addMemberToRole(msg.author, serverRoles['Timeout']);
-        //   colette.sendMessage(msg.channel, "Slllooowww dowwwn~ <@" + msg.author.id + "> ^_^");
-        //   colette.sendFile(msg.channel, 'judgement.png', 'judgement.png');
+        if(qspam_c[msg.author.id].length >= 3) {
+          // Assign 'Timeout' role.
+          colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+          colette.sendMessage(msg.channel, "BAN HAMMER TO SMASH THE SPAMMER <@" + msg.author.id + "> ! >:O !!!");
+          colette.sendFile(msg.channel, 'resources/images/ban_hammer.png', 'judgement.png');
 
-        //   // delete spam
-        //   for(var key in qspam_c[msg.author.id]) {
-        //     colette.deleteMessage(qspam_c[msg.author.id][key]);
-        //   }
+          // delete spam
+          for(var key in qspam_c[msg.author.id]) {
+            colette.deleteMessage(qspam_c[msg.author.id][key]);
+          }
 
-        //   spam_c[msg.author.id] = null;
-        //   qspam_c[msg.author.id] = null;
-        //   setTimeout(function(){
-        //     colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
-        //   }, 1000 * 5);
-        //   clearTimeout(spam_cc[msg.author.id]);
-        //   clearTimeout(qspam_cc[msg.author.id]);
-        // }
+          spam_c[msg.author.id] = null;
+          qspam_c[msg.author.id] = null;
+          setTimeout(function(){
+            colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+          }, 1000 * 5);
+          clearTimeout(spam_cc[msg.author.id]);
+          clearTimeout(qspam_cc[msg.author.id]);
+        }
 
         // Normal Spam Functionality.
         // Push to spam array if it's same message as last
@@ -736,14 +736,14 @@ colette.on("message", function (msg) {
           spam_cc[msg.author.id] = null;
           spam_cc[msg.author.id] = setTimeout(function(){
             spam_c[msg.author.id] = null;
-          }, 1000 * 5);
+          }, 1000 * 10);
           spam_c[msg.author.id].push(msg);
 
-          if(spam_c[msg.author.id].length >= 4) {
+          if(spam_c[msg.author.id].length >= 3) {
             // Assign 'Timeout' role.
             colette.addMemberToRole(msg.author, serverRoles['Timeout']);
-            colette.sendMessage(msg.channel, "Oops! My hands slipped <@" + msg.author.id + "> :P !");
-            colette.sendFile(msg.channel, 'judgement.png', 'judgement.png');
+            colette.sendMessage(msg.channel, "Oops! My hands slipped and I _**accidentally**_ timed out <@" + msg.author.id + "> :P (NO SPAM!) !");
+            colette.sendFile(msg.channel, 'resources/images/judgement.png', 'judgement.png');
 
             // delete spam
             for(var key in spam_c[msg.author.id]) {
@@ -891,7 +891,7 @@ colette.on("serverNewMember", function (server, user) {
   console.log("new user", user);
 
   // PM me about server removals adds.
-  pmme("Looks like we have a newcomer in a _certain_ server: **" + user.username + "**");
+  pmme("Looks like we have a newcomer in the **"+ server.name +"** server: **" + user.username + "**");
 });
 
 /********************************************************************************************/
@@ -900,11 +900,11 @@ colette.on("serverNewMember", function (server, user) {
  * === EVENT : User Removal from Server ===
  * @todo Will soon send which server it happened on as well.
  */
-colette.on("serverRemoveMember", function (user) {
+colette.on("serverMemberRemoved", function (server, user) {
   console.log("left user", user);
 
   // PM me about server removals.
-  pmme("Whoa yikes! The following user was removed from a server: **" + user.username + "**");
+  pmme("Whoa yikes! The following user was removed from the **" + server.name + "** server: **" + user.username + "**");
 });
 
 /********************************************************************************************/
