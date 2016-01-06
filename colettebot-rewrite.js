@@ -60,7 +60,7 @@ var twitch = new TwitchObject(twitch_id);
 // @todo
 
 // Login
-colette.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -534,105 +534,107 @@ Commands[ "coinflip" ] = {
 }
 
 /* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
-Commands[ "setColor" ] = {
-  oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    if(params[2]) {
-      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-    } else {
-      if(params[1]) {
-        var userHasXMAS = false;
+// Commands[ "setColor" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[2]) {
+//       bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+//     } else {
+//       if(params[1]) {
+//         var userHasXMAS = false;
 
-        for (var key in authorRoles) {
-          if(authorRoles.hasOwnProperty(key)) {
-            if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-              userHasXMAS = true;
-            }
-          }
-        }
+//         for (var key in authorRoles) {
+//           if(authorRoles.hasOwnProperty(key)) {
+//             if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+//               userHasXMAS = true;
+//             }
+//           }
+//         }
 
-        var assignXMASRole = function(){
-          var color = params[1];
+//         var assignXMASRole = function(){
+//           var color = params[1];
 
-          switch(color) {
-            case 'red':
-              bot.addMemberToRole(msg.author, serverRoles['XMAS:RED'], function(error){
-                bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
-              });
-              break;
-            case 'green':
-              bot.addMemberToRole(msg.author, serverRoles['XMAS:GREEN'], function(error){
-                bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
-              });
-              break;
-            case 'blue':
-              bot.addMemberToRole(msg.author, serverRoles['XMAS:BLUE'], function(error){
-                bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
-              })
-              break;
-            case 'gold':
-              bot.addMemberToRole(msg.author, serverRoles['XMAS:GOLD'], function(error){
-                bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
-              })
-              break;
-            case 'darkred':
-              bot.addMemberToRole(msg.author, serverRoles['XMAS:DARKRED'], function(error){
-                bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
-              })
-              break;
-            default:
-              bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
-              break;
-          }
-        }
+//           switch(color) {
+//             case 'red':
+//               bot.addMemberToRole(msg.author, serverRoles['XMAS:RED'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
+//               });
+//               break;
+//             case 'green':
+//               bot.addMemberToRole(msg.author, serverRoles['XMAS:GREEN'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
+//               });
+//               break;
+//             case 'blue':
+//               bot.addMemberToRole(msg.author, serverRoles['XMAS:BLUE'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
+//               })
+//               break;
+//             case 'gold':
+//               bot.addMemberToRole(msg.author, serverRoles['XMAS:GOLD'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
+//               })
+//               break;
+//             case 'darkred':
+//               bot.addMemberToRole(msg.author, serverRoles['XMAS:DARKRED'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
+//               })
+//               break;
+//             default:
+//               bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
+//               break;
+//           }
+//         }
 
-        if(userHasXMAS){
-          bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
-        } else {
-          assignXMASRole();
-        }
-      } else {
-        bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
-      }
-    }
-  }
-}
+//         if(userHasXMAS){
+//           bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+//         } else {
+//           assignXMASRole();
+//         }
+//       } else {
+//         bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
+//       }
+//     }
+//   }
+// }
 
-Commands[ "unset" ] = {
-  oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    if(params[1]) {
-      bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
-    } else {
-      var userHasXMAS = false;
+// Commands[ "unset" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[1]) {
+//       bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
+//     } else {
+//       var userHasXMAS = false;
 
-      for (var key in authorRoles) {
-        if(authorRoles.hasOwnProperty(key)) {
-          if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-            userHasXMAS = true;
-            bot.removeMemberFromRole(msg.author, authorRoles[key]);
-          }
-        }
-      }
+//       for (var key in authorRoles) {
+//         if(authorRoles.hasOwnProperty(key)) {
+//           if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
+//             userHasXMAS = true;
+//             bot.removeMemberFromRole(msg.author, authorRoles[key]);
+//           }
+//         }
+//       }
 
-      if(userHasXMAS){
-        bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
-      } else {
-        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-      }
-    }
-  }
-}
+//       if(userHasXMAS){
+//         bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
+//       } else {
+//         bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
+//       }
+//     }
+//   }
+// }
 
-Commands[ "colorhelp" ] = {
-  oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
-  }
-}
+// Commands[ "colorhelp" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
+//   }
+// }
+
+/** END COLOR INTEGRATION **/
 
 
 // Array of all reactions.
@@ -649,8 +651,8 @@ Reactions[ "colette" ] = {
 }
 
 Reactions[ "Aiga" ] = {
-  oplevel: 1,
-  allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  oplevel: 0,
+  allowed_channels: 'all',
   fn: function( bot, msg, msgServer ) {
     // @todo include time of mention in EST
     pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name +"**\nMessage : _\""+ msg.content +"\"_");
@@ -691,35 +693,35 @@ colette.on("message", function (msg) {
       if(msg_c[msg.author.id].length > 1) {
 
         // QuickSpam Functionality
-        if(qspam_c[msg.author.id] == null) {
-          qspam_c[msg.author.id] = [];
-        }
+        // if(qspam_c[msg.author.id] == null) {
+        //   qspam_c[msg.author.id] = [];
+        // }
 
-        qspam_c[msg.author.id].push(msg);
+        // qspam_c[msg.author.id].push(msg);
 
-        qspam_cc = setTimeout(function(){
-          qspam_c[msg.author.id] = null;
-        }, 400);
+        // qspam_cc = setTimeout(function(){
+        //   qspam_c[msg.author.id] = null;
+        // }, 400);
 
-        if(qspam_c[msg.author.id].length >= 3) {
-          // Assign 'Timeout' role.
-          colette.addMemberToRole(msg.author, serverRoles['Timeout']);
-          colette.sendMessage(msg.channel, "BAN HAMMER TO SMASH THE SPAMMER <@" + msg.author.id + "> ! >:O !!!");
-          colette.sendFile(msg.channel, 'resources/images/ban_hammer.png', 'judgement.png');
+        // if(qspam_c[msg.author.id].length >= 3) {
+        //   // Assign 'Timeout' role.
+        //   colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+        //   colette.sendMessage(msg.channel, "BAN HAMMER TO SMASH THE SPAMMER <@" + msg.author.id + "> ! >:O !!!");
+        //   colette.sendFile(msg.channel, 'resources/images/ban_hammer.png', 'judgement.png');
 
-          // delete spam
-          for(var key in qspam_c[msg.author.id]) {
-            colette.deleteMessage(qspam_c[msg.author.id][key]);
-          }
+        //   // delete spam
+        //   for(var key in qspam_c[msg.author.id]) {
+        //     colette.deleteMessage(qspam_c[msg.author.id][key]);
+        //   }
 
-          spam_c[msg.author.id] = null;
-          qspam_c[msg.author.id] = null;
-          setTimeout(function(){
-            colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
-          }, 1000 * 5);
-          clearTimeout(spam_cc[msg.author.id]);
-          clearTimeout(qspam_cc[msg.author.id]);
-        }
+        //   spam_c[msg.author.id] = null;
+        //   qspam_c[msg.author.id] = null;
+        //   setTimeout(function(){
+        //     colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+        //   }, 1000 * 5);
+        //   clearTimeout(spam_cc[msg.author.id]);
+        //   clearTimeout(qspam_cc[msg.author.id]);
+        // }
 
         // Normal Spam Functionality.
         // Push to spam array if it's same message as last
@@ -739,7 +741,7 @@ colette.on("message", function (msg) {
           }, 1000 * 10);
           spam_c[msg.author.id].push(msg);
 
-          if(spam_c[msg.author.id].length >= 3) {
+          if(spam_c[msg.author.id].length >= 4) {
             // Assign 'Timeout' role.
             colette.addMemberToRole(msg.author, serverRoles['Timeout']);
             colette.sendMessage(msg.channel, "Oops! My hands slipped and I _**accidentally**_ timed out <@" + msg.author.id + "> :P (NO SPAM!) !");
