@@ -124,6 +124,13 @@ var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders c
 var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
 var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
 
+/* == GODS == */
+
+var GODS = [
+  "77577477425201152",
+  "90171294200365056",
+];
+
 /* == Features == */
 
 // Notifications Enabling
@@ -138,7 +145,7 @@ var CommandPrefix = "!";
 var Commands = [];
 
 Commands[ "ping" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -148,7 +155,7 @@ Commands[ "ping" ] = {
 }
 
 Commands[ "pong" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -158,16 +165,33 @@ Commands[ "pong" ] = {
 }
 
 Commands[ "gcid" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    // @TODO - Accept one parameter, which is the channel link with #.
+    // No rush for this tbh.
     bot.deleteMessage(msg);
     bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the **" + msg.channel + "** channel:\n\n**" + msg.channel.id + "**");
   }
 }
 
+Commands[ "guid" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var userID = params[1].slice(2, -1);
+      var user = bot.users.get("id", userID);
+      bot.deleteMessage(msg);
+      bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the following user: **" + user.username + "**\n\n**" + userID + "**");
+    } else {
+      bot.sendMessage(bot.users.get("id", msg.author.id), "Heyyy...Ya done messed up mang. Add a parameter to the command. >.>");
+    }
+  }
+}
+
 Commands[ "setName" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -183,7 +207,7 @@ Commands[ "setName" ] = {
 }
 
 Commands[ "setGeneral" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -196,7 +220,7 @@ Commands[ "setGeneral" ] = {
 }
 
 Commands[ "joinServer" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -212,7 +236,7 @@ Commands[ "joinServer" ] = {
 }
 
 Commands[ "setAnn" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -299,7 +323,7 @@ Commands[ "deAutoAnn" ] = {
 }
 
 Commands[ "loadEmo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -350,7 +374,7 @@ Commands[ "loadEmo" ] = {
 }
 
 Commands[ "initEmo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -361,7 +385,7 @@ Commands[ "initEmo" ] = {
 }
 
 Commands[ "enEmo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -372,7 +396,7 @@ Commands[ "enEmo" ] = {
 }
 
 Commands[ "deEmo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -442,7 +466,7 @@ Commands[ "purge" ] = {
 }
 
 Commands[ "enTo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -453,7 +477,7 @@ Commands[ "enTo" ] = {
 }
 
 Commands[ "deTo" ] = {
-  oplevel: 1,
+  oplevel: 2,
   allowed_channels: 'all',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -641,22 +665,138 @@ Commands[ "coinflip" ] = {
 var Reactions = [];
 
 Reactions[ "colette" ] = {
-  oplevel: 1,
-  allowed_channels: [AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  oplevel: 2,
+  allowed_channels: 'all',
   fn: function( bot, msg, msgServer ) {
 
-    bot.sendMessage(msg.channel, "Hm? You called?");
+    if(Math.random() < 0.10) {
+      var answers = [];
+      answers.push({
+        message: "aiga stfu :blue_heart:*"
+      });
+      answers.push({
+        message: "_trips and falls on the floor_"
+      });
+      answers.push({
+        message: ":blue_heart:"
+      });
+      answers.push({
+        message: "Mushbot's pretty cute~"
+      });
 
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
   }
 }
 
-Reactions[ "Aiga" ] = {
+Reactions[ "jace" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, msg, msgServer ) {
+
+    if(Math.random() < 0.05) {
+      var answers = [];
+      answers.push({
+        message: "Jace?...You mean **Tear**, right? :O"
+      });
+      answers.push({
+        message: "Jaceroni! :blue_heart:"
+      });
+      answers.push({
+        message: "Juiace!"
+      });
+      answers.push({
+        message: "Joce! xD"
+      });
+      answers.push({
+        message: "A pic of me and Jace~",
+        filename: 'Colette_Tear_Summer.jpg',
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+      if(answer.filename) {
+        bot.sendFile(msg.channel, 'resources/images/' + answer.filename, answer.filename);
+      }
+    }
+  }
+}
+
+Reactions[ "aero" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, msg, msgServer ) {
+
+    if(Math.random() < 0.05) {
+      var answers = [];
+      answers.push({
+        message: "Aeruuuuuuuuuuu :blue_heart:"
+      });
+      answers.push({
+        message: "_Dole me back!_"
+      });
+      answers.push({
+        message: "..."
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
+  }
+}
+
+Reactions[ "pere" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, msg, msgServer ) {
+
+    if(Math.random() < 0.05) {
+      var answers = [];
+      answers.push({
+        message: ":fish: :lemon: :eyes: :blue_heart:"
+      });
+      answers.push({
+        message: "PERE?! ASFKWTVSAKLW"
+      });
+      answers.push({
+        message: "momma pere is scurry tbh"
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
+  }
+}
+
+Reactions[ "aiga" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   fn: function( bot, msg, msgServer ) {
     // @todo include time of mention in EST
-    pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name +"**\nMessage : _\""+ msg.content +"\"_");
+    pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
 
+    if(Math.random() < 0.10) {
+      var answers = [];
+      answers.push({
+        message: "*summoning Aigachu...*"
+      });
+      answers.push({
+        message: "Aiga's never here smh..."
+      });
+      answers.push({
+        message: ":eyes:gachu sees all"
+      });
+      answers.push({
+        message: "Watch Aiga show up right now..."
+      });
+      answers.push({
+        message: "Aiga makes me wish I was never saved by Lloyd and instead became a vessel for Martel and lost my soul tbh."
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
   }
 }
 
@@ -665,7 +805,7 @@ Reactions[ "Aiga" ] = {
  */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
-  // console.log(msg);
+  console.log(msg);
 
   if(!msg.channel.recipient) {
     // Global Variable across message reactions to get the server the message was taken from.
@@ -701,7 +841,7 @@ colette.on("message", function (msg) {
 
         // qspam_cc = setTimeout(function(){
         //   qspam_c[msg.author.id] = null;
-        // }, 400);
+        // }, 900);
 
         // if(qspam_c[msg.author.id].length >= 3) {
         //   // Assign 'Timeout' role.
@@ -761,8 +901,6 @@ colette.on("message", function (msg) {
         }
       }
 
-      // Check if last 5 items had the same content
-
     }
   }
 
@@ -771,35 +909,32 @@ colette.on("message", function (msg) {
   // Commands
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
-      var params = msg.content.split(" ");
+      var params = msg.content.split(" "); // Divide text into distinct parameters.
       if(params[0].toUpperCase() === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
-        // Check allowed channels
-        if(Commands[key].allowed_channels === 'all') {
-          // Check op level
-          if(Commands[key].oplevel === 1) {
-            if(isAdminMessage(msg)) {
-              // Run the command's function.
-              Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
-            }
-          } else {
-            // Run the command's function.
-            var params = msg.content.split(" ");
-            Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
+
+        var DENIAL_FLAG = false; // handles approval if needed
+
+        // Check OP Level
+        if(Commands[key].oplevel === 2) {
+          if(!isAdminMessage(msg)) {
+            DENIAL_FLAG = true;
           }
-        } else {
-          if(Commands[key].allowed_channels.indexOf(msg.channel.id) > -1) {
-            // Check op level
-            if(Commands[key].oplevel === 1) {
-              if(isAdminMessage(msg)) {
-                // Run the command's function.
-                Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
-              }
-            } else {
-              // Run the command's function.
-              var params = msg.content.split(" ");
-              Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
-            }
+        } else if(Commands[key].oplevel === 1) {
+          if(!isGodMessage(msg)) {
+            DENIAL_FLAG = true;
           }
+        }
+
+        // Check Allowed Channels
+        if(Commands[key].allowed_channels !== 'all') {
+          if(Commands[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+            DENIAL_FLAG = true;
+          }
+        }
+
+        // Run Command if it passed approval.
+        if(!DENIAL_FLAG) {
+          Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
         }
       }
     }
@@ -811,32 +946,30 @@ colette.on("message", function (msg) {
     if (Reactions.hasOwnProperty(key)) {
       var keygex = new RegExp(key, "i");
       if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
-        if(Reactions[key].allowed_channels === 'all') {
-          // Check op level
-          if(Reactions[key].oplevel === 1) {
-            if(isAdminMessage(msg)) {
-              // Run the command's function.
-              Reactions[key].fn(colette, msg, msgServer);
-            }
+
+        var DENIAL_FLAG = false; // handles validation if needed
+
+        // Check OP Level
+        if(Reactions[key].oplevel === 2) {
+          if(!isAdminMessage(msg)) {
+            DENIAL_FLAG = true;
           }
-          else {
-            // Run the command's function.
-            Reactions[key].fn(colette, msg, msgServer);
+        } else if(Reactions[key].oplevel === 1) {
+          if(!isGodMessage(msg)) {
+            DENIAL_FLAG = true;
           }
-        } else {
-          if(Reactions[key].allowed_channels.indexOf(msg.channel.id) > -1) {
-            // Check op level
-            if(Reactions[key].oplevel === 1) {
-              if(isAdminMessage(msg)) {
-                // Run the command's function.
-                Reactions[key].fn(colette, msg, msgServer);
-              }
-            }
-            else {
-              // Run the command's function.
-              Reactions[key].fn(colette, msg, msgServer);
-            }
+        }
+
+        // Check Allowed Channels
+        if(Reactions[key].allowed_channels !== 'all') {
+          if(Reactions[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+            DENIAL_FLAG = true;
           }
+        }
+
+        // Run Command if it passed approval.
+        if(!DENIAL_FLAG) {
+          Reactions[key].fn(colette, msg, msgServer);
         }
       }
     }
@@ -949,6 +1082,17 @@ function isAdminMessage(message) {
     return false;
   }
 }
+
+// Check invoker. If it's a god, roll the command.
+function isGodMessage(message) {
+  var author_id = message.author.id;
+  if(GODS.indexOf(author_id) > -1 || author_id == ADMIN_ID) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 // PM admin (aka me)
 function pmme(message) {
