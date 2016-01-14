@@ -529,7 +529,7 @@ Commands[ "rolldice" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var roll = Math.floor(Math.random() * 6) + 1;
 
@@ -567,7 +567,7 @@ Commands[ "coinflip" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var flip = Math.floor(Math.random() * 2) + 1;
 
@@ -603,7 +603,7 @@ Commands[ "love" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 10,
+  cooldown: 30,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var thing = msg.content.slice(6);
@@ -618,7 +618,7 @@ Commands[ "seppuku" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 10,
+  cooldown: 30,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
       bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
@@ -644,7 +644,7 @@ Commands[ "roulette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 10,
+  cooldown: 30,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     bot.sendMessage(msg.channel, '_Colette grabs a random gun..._\nReady?');
@@ -893,7 +893,7 @@ Reactions[ "jace" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
     if(Math.random() < 0.05) {
@@ -928,7 +928,7 @@ Reactions[ "aero" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
     if(Math.random() < 0.05) {
@@ -953,7 +953,7 @@ Reactions[ "pere" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
     if(Math.random() < 0.05) {
@@ -969,7 +969,7 @@ Reactions[ "pere" ] = {
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
-      bot.sendMessage(msg.channel, answer.message);
+      //bot.sendMessage(msg.channel, answer.message);
     }
   }
 }
@@ -978,7 +978,7 @@ Reactions[ "aiga" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 'none',
+  cooldown: 60,
   fn: function( bot, msg, msgServer ) {
     // @todo include time of mention in EST
     pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
@@ -1206,9 +1206,7 @@ colette.on("message", function (msg) {
           DENIAL_FLAG = true;
          } else {
           COOLDOWNS[key] = true;
-          setTimeout(function(){
-            COOLDOWNS[key] = false;
-          }, 1000 * Reactions[key].cooldown);
+          removeCooldown(key);
          }
         }
 
