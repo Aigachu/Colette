@@ -557,6 +557,112 @@ Commands[ "coinflip" ] = {
   }
 }
 
+Commands[ "roulette" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    bot.sendMessage(msg.channel, '_Colette grabs a random gun..._\nReady?');
+    bot.startTyping(msg.channel);
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, '_Colette spins the cylinder..._');
+
+      var survival = false;
+
+      setTimeout(function(){
+        if(Math.random() < 0.40) { // 40% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette points the gun at <@' + msg.author.id + '>\'s head..._\n');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_Colette pulls the trigger!_');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "_click_...Yay! You **SURVIVED** <@" + msg.author.id + ">! :D_");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "_BANG!_\n\n_Oh no. How unfortunate, you **DIED** <@" + msg.author.id + ">. You will be remembered. ;~;_");
+                });
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 1000);
+          }, 2000);
+        }
+        else if(Math.random() < 0.70) { // 30% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette pulls the trigger without a second thought..._\n');
+          setTimeout(function(){
+            if(survival) {
+              bot.sendMessage(msg.channel, "POW!...Just kidding! You **SURVIVED** <@" + msg.author.id + ">! :D_");
+            } else {
+              bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                bot.sendMessage(msg.channel, "_BANG!_\n\n_That was actually the gun. You're **DEAD**, <@" + msg.author.id + ">. Rest in pepperoni~_");
+              });
+              setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+              }, 10000);
+            }
+          }, 1000);
+        }
+        else if(Math.random() < 0.90) { // 20% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette trips and falls on the ground._');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_The gun magically comes to life and it pulls it\'s own trigger, aiming directly at you!_');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "_Phew! You swiftly dodged the bullet and **SURVIVED** <@" + msg.author.id + ">! The gun glares at you and dissapears._");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "Ow...O-oh no! **YOU GOT DUNKED ON** <@" + msg.author.id + "> !\n\n_The gun laughs and dissapears into the darkness._");
+                });
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 2000);
+          }, 1000);
+        }
+        else { // 10% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette puts down the gun and casts Judgement._');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_Rays of light descend all over the server!_');
+            bot.sendFile(msg.channel, 'resources/images/holy_judgement.png', 'holy_judgement.png');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "Oh phew..., good job dodging that! You **SURVIVED** <@" + msg.author.id + "> ! I never land that move anyways :blush: ");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "O-oops...I messed up...**YOUR BODY IS GONE** ;~;, <@" + msg.author.id + "> ! Rest in pieces :cry:");
+                });
+
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 2000);
+          }, 1000);
+        }
+        bot.stopTyping(msg.channel);
+      }, 2000);
+    }, 1000);
+  }
+}
+
 /* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
 // Commands[ "setColor" ] = {
 //   oplevel: 0,
