@@ -557,6 +557,30 @@ Commands[ "coinflip" ] = {
   }
 }
 
+Commands[ "seppuku" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+      bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
+    });
+
+    // delete messages and KILL THE
+    if(msg_c[msg.author.id] != null) {
+      var d = msg_c[msg.author.id].slice(Math.max(msg_c[msg.author.id].length - 10, 1));
+
+      // delete spam
+      for(var key in d) {
+        colette.deleteMessage(d[key]);
+      }
+    }
+
+    setTimeout(function(){
+      bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+    }, 5000);
+  }
+}
+
 Commands[ "roulette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
