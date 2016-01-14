@@ -60,7 +60,7 @@ var twitch = new TwitchObject(twitch_id);
 // @todo
 
 // Login
-colette.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -86,6 +86,8 @@ var AWORLD_COLETTE = '103228407290003456';
 var NAIFU_SERVER_ID = '82343511336157184';
 // BOTBURGHAL CHANNEL
 var NAIFU_BOT_BURGHAL = '83017907335860224';
+// LOVELOUNGE_CHANNEL
+var NAIFU_LOVE_LOUNGE = '137044760941559809';
 
 // ONETTBOYZ
 // BOTFACILITY CHANNEL
@@ -127,8 +129,9 @@ var EmotesAllowedServers = []; // @todo Will be used to manage which servers hav
 /* == GODS == */
 
 var GODS = [
-  "77577477425201152",
-  "90171294200365056",
+  "77577477425201152", // Dango
+  "90171294200365056", // Zero Bot Samus
+  "82938251760898048", // Mushbot
 ];
 
 /* == Features == */
@@ -601,9 +604,9 @@ Commands[ "coinflip" ] = {
 
 Commands[ "love" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 25,
+  cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var thing = msg.content.slice(6);
@@ -616,9 +619,9 @@ Commands[ "love" ] = {
 
 Commands[ "seppuku" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
-  cooldown: 25,
+  cooldown: 5,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
       bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
@@ -642,9 +645,9 @@ Commands[ "seppuku" ] = {
 
 Commands[ "roulette" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
-  cooldown: 25,
+  cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     bot.sendMessage(msg.channel, '_Colette grabs a random gun..._\nReady?');
@@ -1386,7 +1389,7 @@ function removeCooldown(key) {
   if(typeof Commands[key] !== 'undefined') {
     setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * Commands[key].cooldown);
   } else {
-    setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * 30);
+    setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * 15);
   }
 
 }
