@@ -603,7 +603,7 @@ Commands[ "love" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 30,
+  cooldown: 25,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       var thing = msg.content.slice(6);
@@ -618,7 +618,7 @@ Commands[ "seppuku" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 30,
+  cooldown: 25,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
       bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
@@ -644,7 +644,7 @@ Commands[ "roulette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: 30,
+  cooldown: 25,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
     bot.sendMessage(msg.channel, '_Colette grabs a random gun..._\nReady?');
@@ -1150,6 +1150,8 @@ colette.on("message", function (msg) {
         if(Commands[key].cooldown !== 'none') {
          if(COOLDOWNS[key]) {
           DENIAL_FLAG = true;
+          colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
+          colette.deleteMessage(msg);
          } else {
           COOLDOWNS[key] = true;
           removeCooldown(key);
