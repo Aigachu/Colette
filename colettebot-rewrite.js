@@ -1150,7 +1150,11 @@ colette.on("message", function (msg) {
         if(Commands[key].cooldown !== 'none') {
          if(COOLDOWNS[key]) {
           DENIAL_FLAG = true;
-          colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
+          if(!COOLDOWNS['announce_cd_' + key]) {
+            colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
+            COOLDOWNS['announce_cd_' + key] = true;
+            removeCooldown('announce_cd_' + key);
+          }
           colette.deleteMessage(msg);
          } else {
           COOLDOWNS[key] = true;
@@ -1379,7 +1383,12 @@ function reloadEmotes() {
 
 // Remove cooldown after delay.
 function removeCooldown(key) {
-  setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * Commands[key].cooldown);
+  if(typeof Commands[key] !== 'undefined') {
+    setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * Commands[key].cooldown);
+  } else {
+    setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * 30);
+  }
+
 }
 
 // Get Server Roles
