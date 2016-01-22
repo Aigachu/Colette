@@ -619,7 +619,7 @@ Commands[ "love" ] = {
 
 Commands[ "seppuku" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL],
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
   cooldown: 5,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
@@ -645,7 +645,7 @@ Commands[ "seppuku" ] = {
 
 Commands[ "roulette" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL],
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
   cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
