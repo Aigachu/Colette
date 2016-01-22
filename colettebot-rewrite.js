@@ -83,7 +83,7 @@ colette.on("ready", function () {
 var AWORLD_COLETTE = '103228407290003456';
 
 // NAIFUS
-var NAIFU_SERVER_ID = '82343511336157184';
+var NAIFU_SERVER = '82343511336157184';
 // BOTBURGHAL CHANNEL
 var NAIFU_BOT_BURGHAL = '83017907335860224';
 // LOVELOUNGE_CHANNEL
@@ -530,7 +530,7 @@ Commands[ "deTo" ] = {
 
 Commands[ "rolldice" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
   cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
@@ -568,7 +568,7 @@ Commands[ "rolldice" ] = {
 
 Commands[ "coinflip" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
   cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
@@ -895,7 +895,7 @@ Reactions[ "colette" ] = {
 Reactions[ "jace" ] = {
   oplevel: 0,
   allowed_channels: 'all',
-  allowed_servers: 'all',
+  allowed_servers: [NAIFU_SERVER],
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
@@ -940,10 +940,13 @@ Reactions[ "aero" ] = {
         message: "Aeruuuuuuuuuuu :blue_heart:"
       });
       answers.push({
-        message: "_Dole me back!_"
+        message: "Dole me back!"
       });
       answers.push({
-        message: "..."
+        message: "Aero is the #1 most cute person in the Naifus. :blue_heart:"
+      });
+      answers.push({
+        message: "AERO?! RUH ROH!"
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
@@ -968,7 +971,10 @@ Reactions[ "pere" ] = {
         message: "PERE?! ASFKWTVSAKLW"
       });
       answers.push({
-        message: "momma pere is scurry tbh"
+        message: "Gotta love momma peweden :blue_heart:"
+      });
+      answers.push({
+        message: "hOI!! pEreTEM!!!"
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
@@ -1137,7 +1143,7 @@ colette.on("message", function (msg) {
 
         // Check Allowed Servers
         if(Commands[key].allowed_servers !== 'all') {
-          if(Commands[key].allowed_servers.indexOf(msg.server.id) <= -1) {
+          if(Commands[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
             DENIAL_FLAG = true;
           }
         }
@@ -1197,7 +1203,7 @@ colette.on("message", function (msg) {
 
         // Check Allowed Servers
         if(Reactions[key].allowed_servers !== 'all') {
-          if(Reactions[key].allowed_servers.indexOf(msg.server.id) <= -1) {
+          if(Reactions[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
             DENIAL_FLAG = true;
           }
         }
