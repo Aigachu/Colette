@@ -617,6 +617,110 @@ Commands[ "love" ] = {
   }
 }
 
+Commands[ "8ball" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_servers: 'all',
+  cooldown: 15,
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var answers = [];
+
+      answers.push({
+        message: "8ball says: \"_It is certain._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_It is decidedly so._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Without a doubt._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Yes, definitely._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_You may rely on it._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_As I see it, yes._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Most likely._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Outlook good._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Yes._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Signs point to yes._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Reply hazy try again._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Ask again later._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Better not tell you now._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Cannot predict now._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Concentrate and ask again._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Don't count on it._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_My reply is no._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_My sources say no._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Very doubtful._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Outlook not so good._\"",
+        timeout: 2
+      });
+
+      var rand = answers[Math.floor(Math.random() * answers.length)];
+
+      bot.startTyping(msg.channel);
+
+      setTimeout(function(){
+        bot.sendMessage(msg.channel, "<@" + msg.author.id + "> " + rand.message);
+        bot.stopTyping(msg.channel);
+      }, 1000 * rand.timeout);
+    } else {
+      bot.sendMessage( msg.channel, "8ball says: \"_Now now, ask me something. Don't be shy._\"");
+    }
+  }
+}
+
 Commands[ "seppuku" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
@@ -1126,7 +1230,8 @@ colette.on("message", function (msg) {
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
       var params = msg.content.split(" "); // Divide text into distinct parameters.
-      if(params[0].toUpperCase() === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
+      var command = params[0].toUpperCase();
+      if(command === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
 
         var DENIAL_FLAG = false; // handles approval if needed
 
