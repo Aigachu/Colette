@@ -969,7 +969,7 @@ Commands[ "roulette" ] = {
 var Reactions = [];
 
 Reactions[ "colette" ] = {
-  oplevel: 2,
+  oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
   cooldown: 'none',
@@ -978,7 +978,7 @@ Reactions[ "colette" ] = {
     if(Math.random() < 0.10) {
       var answers = [];
       answers.push({
-        message: "aiga stfu :blue_heart:*"
+        message: ">_>*"
       });
       answers.push({
         message: "_trips and falls on the floor_"
@@ -988,6 +988,9 @@ Reactions[ "colette" ] = {
       });
       answers.push({
         message: "Mushbot's pretty cute~"
+      });
+      answers.push({
+        message: "Fuck you too...I-I mean I'm sorry."
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
@@ -1003,29 +1006,16 @@ Reactions[ "jace" ] = {
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
-    if(Math.random() < 0.05) {
+    if(Math.random() < 0.01) {
       var answers = [];
       answers.push({
         message: "Jace?...You mean **Tear**, right? :O"
       });
-      answers.push({
-        message: "Jaceroni! :blue_heart:"
-      });
-      answers.push({
-        message: "Juiace!"
-      });
-      answers.push({
-        message: "Joce! xD"
-      });
-      answers.push({
-        message: "A pic of me and Jace~",
-        filename: 'Colette_Tear_Summer.jpg',
-      });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
-      bot.sendMessage(msg.channel, answer.message);
+      //bot.sendMessage(msg.channel, answer.message);
       if(answer.filename) {
-        bot.sendFile(msg.channel, 'resources/images/' + answer.filename, answer.filename);
+        //bot.sendFile(msg.channel, 'resources/images/' + answer.filename, answer.filename);
       }
     }
   }
@@ -1050,7 +1040,7 @@ Reactions[ "aero" ] = {
         message: "Aero is the #1 most cute person in the Naifus. :blue_heart:"
       });
       answers.push({
-        message: "AERO?! RUH ROH!"
+        message: "AEWO?! RUH ROH!"
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
@@ -1096,22 +1086,22 @@ Reactions[ "aiga" ] = {
     // @todo include time of mention in EST
     pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
 
-    if(Math.random() < 0.10) {
+    if(Math.random() < 0.02) {
       var answers = [];
       answers.push({
-        message: "*summoning Aigachu...*"
+        message: "who's aiga?"
       });
       answers.push({
         message: "Aiga's never here smh..."
       });
       answers.push({
-        message: ":eyes:gachu sees all"
+        message: ":eyes:gachu"
       });
       answers.push({
-        message: "Watch Aiga show up right now..."
+        message: "eat shit aiga"
       });
       answers.push({
-        message: "Aiga makes me wish I was never saved by Lloyd and instead became a vessel for Martel and lost my soul tbh."
+        message: "Aiga says he's going to replace me with a better bot. ;_;"
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
@@ -1185,40 +1175,40 @@ colette.on("message", function (msg) {
 
         // Normal Spam Functionality.
         // Push to spam array if it's same message as last
-        var lastMsg = msg_c[msg.author.id][msg_c[msg.author.id].length - 2];
+        // var lastMsg = msg_c[msg.author.id][msg_c[msg.author.id].length - 2];
 
-        if(msg.content === lastMsg.content) {
-          if(spam_c[msg.author.id] == null) {
-            spam_c[msg.author.id] = [];
-            // push the first message into this array if it must get deleted
-            //spam_c[msg.author.id].push(lastMsg);
-          }
+        // if(msg.content === lastMsg.content) {
+        //   if(spam_c[msg.author.id] == null) {
+        //     spam_c[msg.author.id] = [];
+        //     // push the first message into this array if it must get deleted
+        //     //spam_c[msg.author.id].push(lastMsg);
+        //   }
 
-          clearTimeout(spam_cc[msg.author.id]);
-          spam_cc[msg.author.id] = null;
-          spam_cc[msg.author.id] = setTimeout(function(){
-            spam_c[msg.author.id] = null;
-          }, 1000 * 10);
-          spam_c[msg.author.id].push(msg);
+        //   clearTimeout(spam_cc[msg.author.id]);
+        //   spam_cc[msg.author.id] = null;
+        //   spam_cc[msg.author.id] = setTimeout(function(){
+        //     spam_c[msg.author.id] = null;
+        //   }, 1000 * 10);
+        //   spam_c[msg.author.id].push(msg);
 
-          if(spam_c[msg.author.id].length >= 4) {
-            // Assign 'Timeout' role.
-            colette.addMemberToRole(msg.author, serverRoles['Timeout']);
-            colette.sendMessage(msg.channel, "Oops! My hands slipped and I _**accidentally**_ timed out <@" + msg.author.id + "> :P (NO SPAM!) !");
-            colette.sendFile(msg.channel, 'resources/images/judgement.png', 'judgement.png');
+        //   if(spam_c[msg.author.id].length >= 4) {
+        //     // Assign 'Timeout' role.
+        //     colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+        //     colette.sendMessage(msg.channel, "Oops! My hands slipped and I _**accidentally**_ timed out <@" + msg.author.id + "> :P (NO SPAM!) !");
+        //     colette.sendFile(msg.channel, 'resources/images/judgement.png', 'judgement.png');
 
-            // delete spam
-            for(var key in spam_c[msg.author.id]) {
-              colette.deleteMessage(spam_c[msg.author.id][key]);
-            }
-            spam_c[msg.author.id] = null;
-            msg_c[msg.author.id] = null;
-            setTimeout(function(){
-              colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
-            }, 1000 * 10);
-            clearTimeout(spam_cc[msg.author.id]);
-          }
-        }
+        //     // delete spam
+        //     for(var key in spam_c[msg.author.id]) {
+        //       colette.deleteMessage(spam_c[msg.author.id][key]);
+        //     }
+        //     spam_c[msg.author.id] = null;
+        //     msg_c[msg.author.id] = null;
+        //     setTimeout(function(){
+        //       colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+        //     }, 1000 * 10);
+        //     clearTimeout(spam_cc[msg.author.id]);
+        //   }
+        // }
       }
 
     }
