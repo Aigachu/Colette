@@ -61,6 +61,7 @@ var twitch = new TwitchObject(twitch_id);
 
 // Login
 colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
+// colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
   }).catch(function (error) {
@@ -855,112 +856,172 @@ Commands[ "roulette" ] = {
   }
 }
 
-/* === SPECIAL: CHRISTMAS COLOR COMMANDS! === */
-// Commands[ "setColor" ] = {
-//   oplevel: 0,
-//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-//   allowed_servers: 'all',
-//   cooldown: 'none',
-//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-//     if(params[2]) {
-//       bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-//     } else {
-//       if(params[1]) {
-//         var userHasXMAS = false;
+/* === SPECIAL: COLOR COMMANDS! === */
+Commands[ "setColor" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE],
+  allowed_servers: 'all',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[2]) {
+      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**(for the fancy peeps)\n\nExample: `!setColor mistyrose`");
+    } else {
+      if(params[1]) {
+        var userHasXMAS = false;
 
-//         for (var key in authorRoles) {
-//           if(authorRoles.hasOwnProperty(key)) {
-//             if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-//               userHasXMAS = true;
-//             }
-//           }
-//         }
+        for (var key in authorRoles) {
+          if(authorRoles.hasOwnProperty(key)) {
+            if(authorRoles[key]['name'].substring(0, 4) === 'VAL:'){
+              userHasXMAS = true;
+            }
+          }
+        }
 
-//         var assignXMASRole = function(){
-//           var color = params[1];
+        var assignXMASRole = function(){
+          var color = params[1];
 
-//           switch(color) {
-//             case 'red':
-//               bot.addMemberToRole(msg.author, serverRoles['XMAS:RED'], function(error){
-//                 bot.sendMessage(msg.channel, "Successfully set your color to red! Merry Christmas! ^-^ :blue_heart:");
-//               });
-//               break;
-//             case 'green':
-//               bot.addMemberToRole(msg.author, serverRoles['XMAS:GREEN'], function(error){
-//                 bot.sendMessage(msg.channel, "Successfully set your color to green! Merry Christmas! ^-^ :blue_heart:");
-//               });
-//               break;
-//             case 'blue':
-//               bot.addMemberToRole(msg.author, serverRoles['XMAS:BLUE'], function(error){
-//                 bot.sendMessage(msg.channel, "Successfully set your color to blue! Merry Christmas! ^-^ :blue_heart:");
-//               })
-//               break;
-//             case 'gold':
-//               bot.addMemberToRole(msg.author, serverRoles['XMAS:GOLD'], function(error){
-//                 bot.sendMessage(msg.channel, "Successfully set your color to gold! Merry Christmas! ^-^ :blue_heart:");
-//               })
-//               break;
-//             case 'darkred':
-//               bot.addMemberToRole(msg.author, serverRoles['XMAS:DARKRED'], function(error){
-//                 bot.sendMessage(msg.channel, "Successfully set your color to dark red! Merry Christmas! ^-^ :blue_heart:");
-//               })
-//               break;
-//             default:
-//               bot.sendMessage(msg.channel, "Sorry ;_; That color isn't Christmasy enough.\nThe available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
-//               break;
-//           }
-//         }
+          switch(color) {
+            case 'red':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:RED'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to red! :blue_heart:");
+              });
+              break;
+            case 'lightpink':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:LIGHTPINK'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to light pink! :blue_heart:");
+              });
+              break;
+            case 'hotpink':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:HOTPINK'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to hot pink! *hawt* :blue_heart:");
+              })
+              break;
+            case 'crimson':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:CRIMSON'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to crimson! :blue_heart:");
+              })
+              break;
+            case 'mistyrose':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:MISTYROSE'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to misty rose (fancy :o)! ^-^ :blue_heart:");
+              })
+              break;
+            case 'lavender':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:LAVENDER'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to lavender! ^-^ :blue_heart:");
+              })
+              break;
+            case 'skyblue':
+              bot.addMemberToRole(msg.author, serverRoles['VAL:SKYBLUE'], function(error){
+                bot.sendMessage(msg.channel, "Successfully set your color to sky blue! ^-^ :blue_heart:");
+              })
+              break;
+            default:
+              bot.sendMessage(msg.channel, "Sorry ;_; That color isn't available.\nThe available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**");
+              break;
+          }
+        }
 
-//         if(userHasXMAS){
-//           bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
-//         } else {
-//           assignXMASRole();
-//         }
-//       } else {
-//         bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**");
-//       }
-//     }
-//   }
-// }
+        if(userHasXMAS){
+          bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+        } else {
+          assignXMASRole();
+        }
+      } else {
+        bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**");
+      }
+    }
+  }
+}
 
-// Commands[ "unset" ] = {
-//   oplevel: 0,
-//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-//   allowed_servers: 'all',
-//   cooldown: 'none',
-//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-//     if(params[1]) {
-//       bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
-//     } else {
-//       var userHasXMAS = false;
+Commands[ "loadColors" ] = {
+  oplevel: 2,
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
+  allowed_servers: 'all',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      bot.sendMessage( msg.channel, "No parameters needed~");
+    } else {
 
-//       for (var key in authorRoles) {
-//         if(authorRoles.hasOwnProperty(key)) {
-//           if(authorRoles[key]['name'].substring(0, 5) === 'XMAS:'){
-//             userHasXMAS = true;
-//             bot.removeMemberFromRole(msg.author, authorRoles[key]);
-//           }
-//         }
-//       }
+      var red = 0xB22222;
+      var lightpink = 0xFFB6C1;
+      var hotpink = 0xFF69B4;
+      var crimson = 0xDC143C;
+      var mistyrose = 0xFFE4E1;
+      var lavender = 0xE6E6FA;
+      var skyblue = 0x9DEBE9;
 
-//       if(userHasXMAS){
-//         bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
-//       } else {
-//         bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`");
-//       }
-//     }
-//   }
-// }
+      for (var key in serverRoles) {
+        if(serverRoles.hasOwnProperty(key)) {
+          switch(serverRoles[key]['name']) {
+            case 'VAL:RED':
+              bot.updateRole(serverRoles[key], {color: red});
+              break;
+            case 'VAL:LIGHTPINK':
+              bot.updateRole(serverRoles[key], {color: lightpink});
+              break;
+            case 'VAL:HOTPINK':
+              bot.updateRole(serverRoles[key], {color: hotpink});
+              break;
+            case 'VAL:CRIMSON':
+              bot.updateRole(serverRoles[key], {color: crimson});
+              break;
+            case 'VAL:MISTYROSE':
+              bot.updateRole(serverRoles[key], {color: mistyrose});
+              break;
+            case 'VAL:LAVENDER':
+              bot.updateRole(serverRoles[key], {color: lavender});
+              break;
+            case 'VAL:SKYBLUE':
+              bot.updateRole(serverRoles[key], {color: skyblue});
+              break;
+          }
+        }
+      }
+      bot.sendMessage( msg.channel, "Colors of LURRRVE loaded! All set and ready to go. :D :heart:");
+    }
+  }
+}
 
-// Commands[ "colorhelp" ] = {
-//   oplevel: 0,
-//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-//   allowed_servers: 'all',
-//   cooldown: 'none',
-//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-//     bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **green**\n  -- **blue**\n  -- **gold**\n  -- **darkred**\n\nExample: `!setColor red`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Merry Christmas btw. ;)");
-//   }
-// }
+Commands[ "unset" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
+  allowed_servers: 'all',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
+    } else {
+      var userHasXMAS = false;
+
+      for (var key in authorRoles) {
+        if(authorRoles.hasOwnProperty(key)) {
+          if(authorRoles[key]['name'].substring(0, 4) === 'VAL:'){
+            userHasXMAS = true;
+            bot.removeMemberFromRole(msg.author, authorRoles[key]);
+          }
+        }
+      }
+
+      if(userHasXMAS){
+        bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
+      } else {
+        bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n\nExample: `!setColor hotpink`");
+      }
+    }
+  }
+}
+
+Commands[ "colorhelp" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+  allowed_servers: 'all',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n\nExample: `!setColor mistyrose`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Have a fun Valentine's Week. ;)");
+  }
+}
 
 /** END COLOR INTEGRATION **/
 
