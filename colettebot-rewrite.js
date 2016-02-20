@@ -91,6 +91,21 @@ var ADMINS = [
 /* === Variables === */
 
 /* == Server Variables  == */
+// AIGA'S HAVEN
+var AIGA_HAVEN = '150507471155232768';
+
+// COLETTE NAME CHANGE CHANNEL
+var AIGA_NC = '150507852182585344';
+
+// COLETTE MENTIONS CHANNEL
+var AIGA_MENTIONS = '150507889310564352';
+
+// COLETTE NEWCOMERS CHANNEL
+var AIGA_NEWCOMERS = '150507947816910848';
+
+// COLETTE REMOVALS CHANNEL
+var AIGA_REMOVALS = '150507988468105216';
+
 // ANOTHER WORLD
 // COLETTE TEST CHANNEL
 var AWORLD_COLETTE = '103228407290003456';
@@ -99,7 +114,7 @@ var AWORLD_COLETTE = '103228407290003456';
 var NAIFU_SERVER = '82343511336157184';
 // BOTBURGHAL CHANNEL
 var NAIFU_BOT_BURGHAL = '83017907335860224';
-// LOVELOUNGE_CHANNEL
+// LOVELOUNGE CHANNEL
 var NAIFU_LOVE_LOUNGE = '137044760941559809';
 
 // ONETTBOYZ
@@ -219,6 +234,17 @@ Commands[ "gcid" ] = {
   }
 }
 
+Commands[ "gsid" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.deleteMessage(msg);
+    bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the server: **" + msg.channel.server.id + "**");
+  }
+}
+
 Commands[ "guid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
@@ -243,7 +269,7 @@ Commands[ "setName" ] = {
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
-      var newName = params[1];
+      var newName = msg.content.substring(params[0].length, msg.content.length);
       bot.setUsername(newName).catch(function(err){
         console.log(err);
       });
@@ -1219,11 +1245,11 @@ Reactions[ "pere" ] = {
 Reactions[ "aiga" ] = {
   oplevel: 0,
   allowed_channels: 'all',
-  allowed_servers: 'all',
+  allowed_servers: [NAIFU_SERVER],
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
     // @todo include time of mention in EST
-    pmme("Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
+    bot.sendMessage(AIGA_MENTIONS, "Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
 
     if(Math.random() < 0.02) {
       var answers = [];
@@ -1491,7 +1517,7 @@ colette.on("message", function (msg) {
  */
 colette.on("messageDelete", function (channel, msg) {
 
-  console.log("MESSAGE WAS DELETED BY " + (msg ? msg.author.username : channel.name));
+  //console.log("MESSAGE WAS DELETED BY " + (msg ? msg.author.username : channel.name));
 
 });
 
@@ -1504,7 +1530,7 @@ colette.on("messageDelete", function (channel, msg) {
  */
 colette.on("messageUpdate", function (msg, formerMsg) {
 
-  console.log(msg.author.username, "changed", formerMsg.content, "to", msg.content);
+  //console.log(msg.author.username, "changed", formerMsg.content, "to", msg.content);
 
 });
 
@@ -1515,10 +1541,12 @@ colette.on("messageUpdate", function (msg, formerMsg) {
  * @todo  Will soon send which server it happened on as well.
  */
 colette.on("serverNewMember", function (server, user) {
-  console.log("new user", user);
+  //console.log("new user", user);
 
-  // PM me about server removals adds.
-  pmme("Looks like we have a newcomer in the **"+ server.name +"** server: **" + user.username + "**");
+  if(server.id != AIGA_HAVEN) {
+    // PM me about server removals adds.
+    colette.sendMessage(AIGA_NEWCOMERS, "Looks like we have a newcomer in the **"+ server.name +"** server: **" + user.username + "**");
+  }
 });
 
 /********************************************************************************************/
@@ -1528,10 +1556,12 @@ colette.on("serverNewMember", function (server, user) {
  * @todo Will soon send which server it happened on as well.
  */
 colette.on("serverMemberRemoved", function (server, user) {
-  console.log("left user", user);
+  //console.log("left user", user);
 
-  // PM me about server removals.
-  pmme("Whoa yikes! The following user was removed from the **" + server.name + "** server: **" + user.username + "**");
+  if(server.id != AIGA_HAVEN) {
+    // PM me about server removals.
+    colette.sendMessage(AIGA_REMOVALS, "Whoa yikes! The following user was removed from the **" + server.name + "** server: **" + user.username + "**");
+  }
 });
 
 /********************************************************************************************/
@@ -1540,13 +1570,13 @@ colette.on("serverMemberRemoved", function (server, user) {
  * === EVENT : User Information Change ===
  */
 colette.on("userUpdate", function (oldUser, newUser) {
-  console.log(oldUser, "vs", newUser);
+  //console.log(oldUser, "vs", newUser);
 
   // Send name change information to me in PMs
   if(oldUser.username !== newUser.username) {
-    pmme("Name change logged. :) Here's the information:\nUser's ID: **" + oldUser.id + "**\n\nOld Name: **" + oldUser.username + "**\nNew Name: **" + newUser.username + "**\n-------------------------------");
+    colette.sendMessage(AIGA_NC, "Name change logged. :) Here's the information:\nUser's ID: **" + oldUser.id + "**\n\nOld Name: **" + oldUser.username + "**\nNew Name: **" + newUser.username + "**\n-------------------------------");
   }
-
+  
   // Log name change information in files.
   // @TODO
 });
@@ -1557,7 +1587,7 @@ colette.on("userUpdate", function (oldUser, newUser) {
  * === EVENT : Channel Creation ===
  */
 colette.on("channelCreate", function(chann){
-  console.log(chann);
+  //console.log(chann);
 })
 
 /********************************************************************************************/
