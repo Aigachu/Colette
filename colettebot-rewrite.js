@@ -72,6 +72,18 @@ colette.on("ready", function () {
   console.log("Jack in! Colette! Execute!");
 })
 
+// Admin account to restrict Bot commands!
+// There are ways to get this ID ;)
+var GOD_ID = '77517077325287424'; // My account ID <3
+
+/* == ADMINS == */
+
+var ADMINS = [
+  "77577477425201152", // Dango
+  "90171294200365056", // Zero Bot Samus
+  "82938251760898048", // Mushbot
+];
+
 /********************************************************************************************/
 
 /* === The Juicy Stuff === */
@@ -98,11 +110,6 @@ var ONETT_BOT_FACILITY = '83224528322297856';
 // Define Interval Array Variable
 var stream_check_interval_ids = [];
 
-// Admin account to restrict Bot commands!
-// There are ways to get this ID ;)
-var ADMIN_ID = '77517077325287424'; // My account ID <3
-var PM_CHANNEL_ID = '83297162842079232'; // My pm channel ID so colette can PM me <3
-
 // Default Announcement Channel
 var ANN_CHANNEL = 'announcements';
 
@@ -127,14 +134,6 @@ var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders c
 var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
 var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
 
-/* == GODS == */
-
-var GODS = [
-  "77577477425201152", // Dango
-  "90171294200365056", // Zero Bot Samus
-  "82938251760898048", // Mushbot
-];
-
 /* == Features == */
 
 // Notifications Enabling
@@ -145,8 +144,43 @@ var auto_time = true; // Enabled by default
 
 
 // Array of all commands.
-var CommandPrefix = "!";
+var CommandPrefix = "!"; // The prefix for all commands!
 var Commands = [];
+
+/**
+ * Commands
+ * -- oplevel: The restriction of who can use the command.
+ *  - 0 -> Anyone can use the command.
+ *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
+ *  - 2 -> Only the GOD can use the command. (The GOD ID in the variable above)
+ *  
+ * -- allowed_channels: Channels in which the command works.
+ *  - 'all' -> Will work in all channels.
+ *  - [CHANNEL_ID_1, CHANNEL_ID_2, ...] -> Array of all channel IDs where the command will work.
+ *
+ * -- allowed_servers: Servers in which the command works.
+ *  - 'all' -> Will work in all servers.
+ *  - [SERVER_ID_1, SERVER_ID_2, ...] -> Array of all server IDs where the command will work.
+ *
+ * -- cooldown: Cooldown time of the command (in seconds)
+ *  - 20 -> 20 seconds.
+ *  - 40 -> 40 seconds.
+ *    - Any number here works.
+ *
+ * -- fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+ *      // Your code for the command goes here.
+ *    }
+ *  - bot -> Bot object to use for bot actions.
+ *  - params -> Command parameter array.
+ *    - If the command is  "!test 5 peach 8" ...
+ *    - params[1] = 5,
+ *    - params[2] = peach,
+ *    - params[3] = 8.
+ *   - msg -> Message object of the invoked message that triggered the command.
+ *   - msgServer -> Server that the message arrived from.
+ *   - serverRoles -> All roles of the server that the command was invoked from in an array.
+ *   - authorRoles -> All roles of the author that invoked the command.
+ */
 
 Commands[ "ping" ] = {
   oplevel: 2,
@@ -1038,6 +1072,41 @@ Commands[ "colorhelp" ] = {
 // Array of all reactions.
 var Reactions = [];
 
+/**
+ * Reactions
+ * -- oplevel: The restriction of who can use the command.
+ *  - 0 -> Anyone can use the command.
+ *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
+ *  - 2 -> Only the GOD can use the command. (The GOD ID in the variable above)
+ *  
+ * -- allowed_channels: Channels in which the command works.
+ *  - 'all' -> Will work in all channels.
+ *  - [CHANNEL_ID_1, CHANNEL_ID_2, ...] -> Array of all channel IDs where the command will work.
+ *
+ * -- allowed_servers: Servers in which the command works.
+ *  - 'all' -> Will work in all servers.
+ *  - [SERVER_ID_1, SERVER_ID_2, ...] -> Array of all server IDs where the command will work.
+ *
+ * -- cooldown: Cooldown time of the command (in seconds)
+ *  - 20 -> 20 seconds.
+ *  - 40 -> 40 seconds.
+ *    - Any number here works.
+ *
+ * -- fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+ *      // Your code for the command goes here.
+ *    }
+ *  - bot -> Bot object to use for bot actions.
+ *  - params -> Command parameter array.
+ *    - If the command is  "!test 5 peach 8" ...
+ *    - params[1] = 5,
+ *    - params[2] = peach,
+ *    - params[3] = 8.
+ *   - msg -> Message object of the invoked message that triggered the command.
+ *   - msgServer -> Server that the message arrived from.
+ *   - serverRoles -> All roles of the server that the command was invoked from in an array.
+ *   - authorRoles -> All roles of the author that invoked the command.
+ */
+
 Reactions[ "colette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
@@ -1297,11 +1366,11 @@ colette.on("message", function (msg) {
 
         // Check OP Level
         if(Commands[key].oplevel === 2) {
-          if(!isAdminMessage(msg)) {
+          if(!isGodMessage(msg)) {
             DENIAL_FLAG = true;
           }
         } else if(Commands[key].oplevel === 1) {
-          if(!isGodMessage(msg)) {
+          if(!isAdminMessage(msg)) {
             DENIAL_FLAG = true;
           }
         }
@@ -1357,11 +1426,11 @@ colette.on("message", function (msg) {
 
         // Check OP Level
         if(Reactions[key].oplevel === 2) {
-          if(!isAdminMessage(msg)) {
+          if(!isGodMessage(msg)) {
             DENIAL_FLAG = true;
           }
         } else if(Reactions[key].oplevel === 1) {
-          if(!isGodMessage(msg)) {
+          if(!isAdminMessage(msg)) {
             DENIAL_FLAG = true;
           }
         }
@@ -1497,9 +1566,9 @@ colette.on("channelCreate", function(chann){
 
 // Check invoker. If it's you, roll the command.
 // @TODO - ROLE HANDLING INSTEAD OF ACCOUNT ID
-function isAdminMessage(message) {
+function isGodMessage(message) {
   var author_id = message.author.id;
-  if(author_id == ADMIN_ID) {
+  if(author_id == GOD_ID) {
     return true;
   } else {
     return false;
@@ -1507,9 +1576,9 @@ function isAdminMessage(message) {
 }
 
 // Check invoker. If it's a god, roll the command.
-function isGodMessage(message) {
+function isAdminMessage(message) {
   var author_id = message.author.id;
-  if(GODS.indexOf(author_id) > -1 || author_id == ADMIN_ID) {
+  if(ADMINS.indexOf(author_id) > -1 || author_id == GOD_ID) {
     return true;
   } else {
     return false;
@@ -1520,7 +1589,7 @@ function isGodMessage(message) {
 // PM admin (aka me)
 function pmme(message) {
   // Might be able to change this to a user for the channel resolvable.
-  colette.sendMessage(colette.users.get("id", ADMIN_ID), message);
+  colette.sendMessage(colette.users.get("id", GOD_ID), message);
 }
 
 // Function used to return channels for respective servers.
