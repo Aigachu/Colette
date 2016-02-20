@@ -158,12 +158,22 @@ var notify_mentions = true;
 var auto_time = true; // Enabled by default
 
 
-// Array of all commands.
-var CommandPrefix = "!"; // The prefix for all commands!
-var Commands = [];
+/* ***************************************|||||||||||||||||||||*************************************************** */
+/* *************************************** COMMANDS, REACTIONS *************************************************** */
+/* ***************************************|||||||||||||||||||||*************************************************** */
 
 /**
- * Commands
+ * COMMANDS ARRAY
+ * Holds COMMANDS objects.
+ * Defines actions taken when certain commands are called in chat.
+ * @type {Array}
+ */
+var Commands = [];
+
+var CommandPrefix = "!"; // The prefix for all commands!
+
+/**
+ * Commands Description
  * -- oplevel: The restriction of who can use the command.
  *  - 0 -> Anyone can use the command.
  *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
@@ -201,6 +211,10 @@ Commands[ "ping" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -213,6 +227,8 @@ Commands[ "pong" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -225,6 +241,8 @@ Commands[ "gcid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     // @TODO - Accept one parameter, which is the channel link with #.
@@ -238,6 +256,8 @@ Commands[ "gsid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.deleteMessage(msg);
@@ -249,6 +269,8 @@ Commands[ "guid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -266,6 +288,8 @@ Commands[ "setName" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -284,6 +308,8 @@ Commands[ "setGeneral" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -299,6 +325,8 @@ Commands[ "joinServer" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -317,6 +345,8 @@ Commands[ "setAnn" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -332,6 +362,8 @@ Commands[ "ann" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -355,6 +387,8 @@ Commands[ "autoAnn" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -386,6 +420,8 @@ Commands[ "deAutoAnn" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -412,6 +448,8 @@ Commands[ "loadEmo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -465,6 +503,8 @@ Commands[ "initEmo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -478,6 +518,8 @@ Commands[ "enEmo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -491,6 +533,8 @@ Commands[ "deEmo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -504,6 +548,8 @@ Commands[ "timeout" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[3]) {
@@ -541,6 +587,8 @@ Commands[ "purge" ] = {
   oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[3]) {
@@ -567,6 +615,8 @@ Commands[ "enTo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -580,6 +630,8 @@ Commands[ "deTo" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -593,6 +645,8 @@ Commands[ "rolldice" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var roll = Math.floor(Math.random() * 6) + 1;
@@ -631,6 +685,8 @@ Commands[ "coinflip" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 10,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var flip = Math.floor(Math.random() * 2) + 1;
@@ -667,6 +723,8 @@ Commands[ "love" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -682,6 +740,8 @@ Commands[ "8ball" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -786,6 +846,8 @@ Commands[ "seppuku" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 5,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
@@ -812,6 +874,8 @@ Commands[ "roulette" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 15,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
@@ -921,6 +985,8 @@ Commands[ "setColor" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[2]) {
@@ -1003,6 +1069,8 @@ Commands[ "loadColors" ] = {
   oplevel: 2,
   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -1057,6 +1125,8 @@ Commands[ "unset" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -1086,6 +1156,8 @@ Commands[ "colorhelp" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**\n\nExample: `!setColor mistyrose`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Have a fun Valentine's Week. ;)");
@@ -1094,12 +1166,23 @@ Commands[ "colorhelp" ] = {
 
 /** END COLOR INTEGRATION **/
 
+/**
+ * ***********************************************
+ * END COMMANDS
+ * ***********************************************
+ */
 
-// Array of all reactions.
+
+/**
+ * REACTIONS ARRAY
+ * Holds REACTION objects.
+ * Defines actions taken when certain words are found in messages.
+ * @type {Array}
+ */
 var Reactions = [];
 
 /**
- * Reactions
+ * Reactions Description
  * -- oplevel: The restriction of who can use the command.
  *  - 0 -> Anyone can use the command.
  *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
@@ -1137,6 +1220,8 @@ Reactions[ "colette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, msg, msgServer ) {
 
@@ -1168,6 +1253,8 @@ Reactions[ "jace" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: [NAIFU_SERVER],
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
@@ -1190,6 +1277,8 @@ Reactions[ "aero" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
@@ -1218,6 +1307,8 @@ Reactions[ "pere" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
 
@@ -1246,6 +1337,8 @@ Reactions[ "aiga" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: [NAIFU_SERVER],
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 60,
   fn: function( bot, msg, msgServer ) {
     // @todo include time of mention in EST
@@ -1274,6 +1367,47 @@ Reactions[ "aiga" ] = {
     }
   }
 }
+/**
+ * ***********************************************
+ * END REACTIONS
+ * ***********************************************
+ */
+
+/**
+ * PRECISE REACTIONS ARRAY
+ * Holds REACTION objects.
+ * Defines actions taken when certain words are found in messages.
+ * @type {Array}
+ */
+var PReactions = [];
+
+Reactions[ "ai" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, msg, msgServer ) {
+    var answers = [];
+    answers.push({
+      message: "Got em~"
+    });
+
+    var answer = answers[Math.floor(Math.random() * answers.length)];
+    bot.sendMessage(msg.channel, answer.message);
+  }
+}
+
+/**
+ * ***********************************************
+ * END PRECISE REACTIONS
+ * ***********************************************
+ */
+
+/* ***************************************|||||||||||||||||||||||*************************************************** */
+/* *************************************** MESSAGE EVENT ACTIONS *************************************************** */
+/* ***************************************|||||||||||||||||||||||*************************************************** */
 
 /**
  * === EVENT : Message Creation (Sent)  ===
@@ -1289,7 +1423,11 @@ colette.on("message", function (msg) {
     var authorRoles = msg.channel.server.rolesOfUser(msg.author);
   }
 
-  // Automatic Timeouts
+  /**
+   * *******************************************************
+   * AUTOMATIC TIMEOUTS STARTS
+   * *******************************************************
+   */
   if(auto_time) {
     if(msg.author.id != colette.user.id) {
       // User Message Cache
@@ -1379,9 +1517,17 @@ colette.on("message", function (msg) {
     }
   }
 
+  /**
+   * *******************************************************
+   * AUTOMATIC TIMEOUTS END
+   * *******************************************************
+   */
 
-
-  // Commands
+  /**
+   * *******************************************************
+   * COMMANDS HANDLING START
+   * *******************************************************
+   */
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
       var params = msg.content.split(" "); // Divide text into distinct parameters.
@@ -1438,11 +1584,20 @@ colette.on("message", function (msg) {
       }
     }
   }
+  /**
+   * *******************************************************
+   * COMMANDS HANDLING END
+   * *******************************************************
+   */
 
 
 
-  // Reactions
-  // Same as commands, but do not require a prefix (and tend to have cooldowns)
+  /**
+   * *******************************************************
+   * REACTIONS HANDLING START
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
   for (var key in Reactions) {
     if (Reactions.hasOwnProperty(key)) {
       var keygex = new RegExp(key, "i");
@@ -1492,6 +1647,74 @@ colette.on("message", function (msg) {
       }
     }
   }
+  /**
+   * *******************************************************
+   * REACTIONS HANDLING END
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
+  
+  /**
+   * *******************************************************
+   * PRECISE REACTIONS HANDLING START
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
+
+  for (var key in PReactions) {
+    if (PReactions.hasOwnProperty(key)) {
+      if( msg.content.indexOf(key) > -1 && ( msg.content[msg.content.indexOf(key) - 1] === " " || msg.content[msg.content.indexOf(key) - 1] === null) && msg.author.id !== colette.user.id) {
+
+        var DENIAL_FLAG = false; // handles validation if needed
+
+        // Check OP Level
+        if(PReactions[key].oplevel === 2) {
+          if(!isGodMessage(msg)) {
+            DENIAL_FLAG = true;
+          }
+        } else if(PReactions[key].oplevel === 1) {
+          if(!isAdminMessage(msg)) {
+            DENIAL_FLAG = true;
+          }
+        }
+
+        // Check Allowed Servers
+        if(PReactions[key].allowed_servers !== 'all') {
+          if(PReactions[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
+            DENIAL_FLAG = true;
+          }
+        }
+
+        // Check Allowed Channels
+        if(PReactions[key].allowed_channels !== 'all') {
+          if(PReactions[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+            DENIAL_FLAG = true;
+          }
+        }
+
+        // Check Cooldown (if any)
+        if(PReactions[key].cooldown !== 'none') {
+         if(COOLDOWNS[key]) {
+          DENIAL_FLAG = true;
+         } else {
+          COOLDOWNS[key] = true;
+          removeCooldown(key);
+         }
+        }
+
+        // Run Command if it passed approval.
+        if(!DENIAL_FLAG) {
+          PReactions[key].fn(colette, msg, msgServer);
+        }
+      }
+    }
+  }
+  /**
+   * *******************************************************
+   * REACTIONS HANDLING END
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
 
   // Emotes
   if(EmotesOn) {
