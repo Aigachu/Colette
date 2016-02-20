@@ -22,6 +22,7 @@ var nconf = require('nconf');
 
 /* === Configurations === */
 
+
 /**
  * discord.js
  * Uses the discord.js module made by hydrabolt.
@@ -32,8 +33,7 @@ var nconf = require('nconf');
 var colette = new Discord.Client();
 
 // Authentication JSON
-// @todo store authentication in json file
-// var Auth = require("./auth.json"); // @TODO JSON STORAGE
+var auth = JSON.parse(fs.readFileSync("./auth.json", "utf8"))
 
 /**
  * Twitch API
@@ -48,7 +48,7 @@ var colette = new Discord.Client();
   Go to your account settings and click on the "Connections" tab.
   At the very bottom, click on "Register an application".
  */
-var twitch_id = 'tn2tqa6lnu7gj3pl5h680dc40sbv5r2';
+var twitch_id = auth.twitch_id;
 
 // Instantiate Twitch Object
 var twitch = new TwitchObject(twitch_id);
@@ -60,7 +60,7 @@ var twitch = new TwitchObject(twitch_id);
 // @todo
 
 // Login
-colette.login("aigabot.sama@gmail.com", "xu8h7gy@")
+colette.login(auth.email, auth.pass)
 // colette.login("aigabot2@gmail.com", "xu8h7gy@")
   .then(function (token) {
     console.log("Initating cuteness...");
