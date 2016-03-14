@@ -1,3 +1,5 @@
 config.json
 authority.json
 auth.json
+liveauth.json
+devauth.json
