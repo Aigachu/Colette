@@ -3,12 +3,25 @@
 // discord.js module
 var Discord = require("discord.js");
 
+// twitch module
+var TwitchObject = require('./lib/twitch.js');
+
 // filesystem
 var fs = require('fs');
+
+// request
+var request = require('request');
+
+// moment
+var moment = require('moment-timezone');
+
+// nconf -- Configuration Files
+var nconf = require('nconf');
 
 /********************************************************************************************/
 
 /* === Configurations === */
+
 
 /**
  * discord.js
@@ -17,34 +30,58 @@ var fs = require('fs');
  */
 
 // This instantiates a Discord Client that the bot uses.
-var dbot = new Discord.Client();
+var colette = new Discord.Client();
+
+// Authentication JSON
+var auth = JSON.parse(fs.readFileSync("./auth.json", "utf8"))
+
+/**
+ * Twitch API
+ * Access to twitch module & functions found in twitch.js
+ * Comment if you aren't using twitch functionality.
+ * @todo : DOCUMENTATION
+ */
+
+/*
+  Twitch Application Client ID
+  Must be generated using a Twitch account.
+  Go to your account settings and click on the "Connections" tab.
+  At the very bottom, click on "Register an application".
+ */
+var twitch_id = auth.twitch_id;
+
+// Instantiate Twitch Object
+var twitch = new TwitchObject(twitch_id);
+
 
 /********************************************************************************************/
 
 /* === Configurations === */
+// @todo
 
 // Login
-dbot.login("aigabot2@gmail.com", "xu8h7gy@")
+colette.login(auth.email, auth.pass)
   .then(function (token) {
-    console.log("Loading up...");
+    console.log("Initating cuteness...");
   }).catch(function (error) {
     console.log(error);
   });
 
-dbot.on("ready", function () {
-  console.log("Discord bot ready.");
+colette.on("ready", function () {
+  console.log("Jack in! Colette! Execute!");
 })
 
 // Admin account to restrict Bot commands!
 // There are ways to get this ID ;)
-var GOD = '80922902995673088'; // My account ID <3
+var GOD_ID = '77517077325287424'; // My account ID <3
 
 /* == ADMINS == */
-// Other user IDs that will be able to use your bot.
+
 var ADMINS = [
-  "83629904356208640", // example
-  "77517077325287424", // example
-  "80922902995673088", // example
+  "77577477425201152", // Dango
+  "90171294200365056", // Zero Bot Samus
+  "82938251760898048", // Mushbot
+  "70634471967162368", // Zeke
 ];
 
 /********************************************************************************************/
@@ -54,24 +91,94 @@ var ADMINS = [
 /* === Variables === */
 
 /* == Server Variables  == */
-// Create your server ID variables here.
+// AIGA'S HAVEN
+var AIGA_HAVEN = '150507471155232768';
+
+// COLETTE NAME CHANGE CHANNEL
+var AIGA_NC = '150507852182585344';
+
+// COLETTE MENTIONS CHANNEL
+var AIGA_MENTIONS = '150507889310564352';
+
+// COLETTE NEWCOMERS CHANNEL
+var AIGA_NEWCOMERS = '150507947816910848';
+
+// COLETTE REMOVALS CHANNEL
+var AIGA_REMOVALS = '150507988468105216';
+
+// ANOTHER WORLD
+// COLETTE TEST CHANNEL
+var AWORLD_COLETTE = '103228407290003456';
+
+// NAIFUS
+var NAIFU_SERVER = '82343511336157184';
+// BOTBURGHAL CHANNEL
+var NAIFU_BOT_BURGHAL = '83017907335860224';
+// LOVELOUNGE CHANNEL
+var NAIFU_LOVE_LOUNGE = '137044760941559809';
+
+// ONETTBOYZ
+// BOTFACILITY CHANNEL
+var ONETT_BOT_FACILITY = '83224528322297856';
+
+
+// Define Interval Array Variable
+var stream_check_interval_ids = [];
+
+// Default Announcement Channel
+var ANN_CHANNEL = 'announcements';
+
+// Default General Channel
+var GENERAL_CHANNEL = 'general';
 
 // Command/Reactions Cooldowns
 var COOLDOWNS = [];
 
-/* == The Good  Stuff == */
+// Chat Timeouts
+var timeouts = {};
+var timeoutCounts = {};
+var msg_c = []; // user message cache
+var msg_cc = []; // message cache clear variable. holds timeout
+var spam_c = []; // spam message cache
+var spam_cc = []; // spam cache clear variable. holds timeout
+var qspam_c = []; // quickspam message cache
+var qspam_cc = []; // quickspam cache clear variable. holds timeout
 
-// Array of all commands.
-var CommandPrefix = "!"; // The prefix for all commands!
-var Commands = [];
+// Emotes Initiation
+var Emotes = reloadEmotes(); // Initiates emotes array with all emotes folders currently present.
+var EmotesOn = false; // Will be used to manage toggling the emotes feature. Disabled by default.
+var EmotesAllowedServers = []; // @todo Will be used to manage which servers have access to this feature.
+
+/* == Features == */
+
+// Notifications Enabling
+var notify_mentions = true;
+
+// Auto Timeouts Enabling
+var auto_time = true; // Enabled by default
+
+
+/* ***************************************|||||||||||||||||||||*************************************************** */
+/* *************************************** COMMANDS, REACTIONS *************************************************** */
+/* ***************************************|||||||||||||||||||||*************************************************** */
 
 /**
- * Commands
+ * COMMANDS ARRAY
+ * Holds COMMANDS objects.
+ * Defines actions taken when certain commands are called in chat.
+ * @type {Array}
+ */
+var Commands = [];
+
+var CommandPrefix = "!"; // The prefix for all commands!
+
+/**
+ * Commands Description
  * -- oplevel: The restriction of who can use the command.
  *  - 0 -> Anyone can use the command.
  *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
  *  - 2 -> Only the GOD can use the command. (The GOD ID in the variable above)
- *  
+ *
  * -- allowed_channels: Channels in which the command works.
  *  - 'all' -> Will work in all channels.
  *  - [CHANNEL_ID_1, CHANNEL_ID_2, ...] -> Array of all channel IDs where the command will work.
@@ -100,15 +207,18 @@ var Commands = [];
  *   - authorRoles -> All roles of the author that invoked the command.
  */
 
-
-Commands[ "bitch" ] = {
+Commands[ "ping" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
-    pmme("If you are seeing this it's too late");
+    pmme("New, CLEAN pong. That's right, we're fancy now Aiga.");
 
   }
 }
@@ -117,22 +227,12 @@ Commands[ "pong" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
 
-    bot.sendMessage(msg.channel, "u ugly af dont talk to me");
-
-  }
-}
-
-Commands[ "make4noticeme" ] = {
-  oplevel: 0,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-
-    bot.sendMessage(msg.channel, "Fuck you");
+    bot.sendMessage(msg.channel, "New, CLEAN ping. That's right, we're fancy now Aiga.");
 
   }
 }
@@ -141,6 +241,8 @@ Commands[ "gcid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     // @TODO - Accept one parameter, which is the channel link with #.
@@ -150,10 +252,25 @@ Commands[ "gcid" ] = {
   }
 }
 
+Commands[ "gsid" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.deleteMessage(msg);
+    bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the server: **" + msg.channel.server.id + "**");
+  }
+}
+
 Commands[ "guid" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -167,21 +284,12 @@ Commands[ "guid" ] = {
   }
 }
 
-Commands[ "gsid" ] = {
-  oplevel: 2,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    bot.deleteMessage(msg);
-    bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the server: **" + msg.channel.server.id + "**");
-  }
-}
-
 Commands[ "setName" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -191,7 +299,24 @@ Commands[ "setName" ] = {
       });
       bot.sendMessage( msg.channel, "Changing my name!");
     } else {
-      bot.sendMessage( msg.channel, "Change it to what?...I can't change it to blank you binche. -_-");
+      bot.sendMessage( msg.channel, "Change it to what?...I can't change it to blank. -_-");
+    }
+  }
+}
+
+Commands[ "setGeneral" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      GENERAL_CHANNEL = params[1];
+      bot.sendMessage( msg.channel, "Gotcha! The general channel has been changed to **" + GENERAL_CHANNEL + "**!");
+    } else {
+      bot.sendMessage( msg.channel, "Aigaaa...Don't mess with me. That's blank. -_-");
     }
   }
 }
@@ -200,6 +325,8 @@ Commands[ "joinServer" ] = {
   oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
@@ -209,331 +336,858 @@ Commands[ "joinServer" ] = {
       //@TODO trycatch for error handling.
       bot.sendMessage( msg.channel, "Infiltrating the server. >:3");
     } else {
-      bot.sendMessage( msg.channel, "Send me a blank command that needs parameters ONE MORE TIME MAI I S2G.");
+      bot.sendMessage( msg.channel, "Send me a blank command that needs parameters ONE MORE TIME AIGA I S2G.");
     }
   }
 }
 
-
-Commands[ "Aiga" ] = {
-  oplevel: 0,
+Commands[ "setAnn" ] = {
+  oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('pic'); 
-    var folder = "resources/imagecommands/pic/"; 
-    var rand = Math.floor(Math.random() * imgz.length);
-
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+    if(params[1]) {
+      ANN_CHANNEL = params[1];
+      bot.sendMessage( msg.channel, "Gotcha! The announcement channel has been changed to **" + ANN_CHANNEL + "**!");
+    } else {
+      bot.sendMessage( msg.channel, "Send me a blank command that needs parameters ONE MORE TIME AIGA I S2G.");
+    }
   }
 }
 
-Commands[ "rnh" ] = {
-  oplevel: 0,
+Commands[ "ann" ] = {
+  oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('rnh');
-    var folder = "resources/imagecommands/rnh/";
-    var rand = Math.floor(Math.random() * imgz.length)
+    if(params[1]) {
+      var twitch_channel = params[1];
 
-    bot.sendFile(msg.channel, folder + imgz[rand],imgz[rand]);
+      twitch.streamIsOnline(twitch_channel, function( data ) {
+        if(data.stream) {
+          bot.sendMessage( msg.channel, "Success! That stream is online Aiga! I'll announce it now. :blue_heart:");
+          bot.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
+        } else {
+          bot.sendMessage( msg.channel, "Welp! That stream is either invalid or offline! Ya messed up.");
+        }
+      });
+    } else {
+      bot.sendMessage( msg.channel, "Specify a valid Twitch channel...Or I'll beat the crap out of you Aiga.");
+    }
+  }
+}
 
+Commands[ "autoAnn" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var twitch_channel = params[1];
 
-    bot.sendMessage(msg.channel, "ITS REAL NIGGA HOURS BOIIIIIIIIIIIIIIII IF YOU AINT A FAKE NIGGA GET THE FUCK UP AND SMASH THAT LIKE BUTTON");
+      bot.sendMessage( msg.channel, "I've activated auto announcements for the following stream: **" + twitch_channel + "** !\nThis only works for valid Twitch channels. There will never be an alert if the channel is invalid.\nThe message will be announced once the channel goes live!");
+
+      if(!stream_check_interval_ids[msgServer + twitch_channel]) {
+        stream_check_interval_ids[msgServer + twitch_channel] = setInterval(function () {
+          twitch.streamIsOnline(twitch_channel, function( data ) {
+            if(data.stream) {
+              bot.sendMessage( msg.channel, "Oh! **" + twitch_channel + "** went online Aiga! I\'ll announce it now! :) :blue_heart:");
+              bot.sendMessage( getServerChannel(msgServer, ANN_CHANNEL), "HELLOOOO @everyone !\n\n**" + data.stream_channel + "** is live! Come watch!\n\n" + data.stream_link);
+              clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
+              stream_check_interval_ids[msgServer + twitch_channel] = null;
+            } else {
+              console.log("Stream checked. Offline...");
+            }
+          });
+        }, 1000 * 5);
+      }
+    } else {
+      bot.sendMessage( msg.channel, "Specify a valid Twitch channel...Or I'll beat the crap out of you Aiga.");
+    }
+  }
+}
+
+Commands[ "deAutoAnn" ] = {
+  oplevel: 1,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var twitch_channel = params[1];
+      // @todo clear all if no argument
+      // if with new message
+      clearInterval(stream_check_interval_ids[msgServer + twitch_channel]);
+      stream_check_interval_ids[msgServer + twitch_channel] = null;
+
+      colette.sendMessage( msg.channel, "I've deactivated auto announcements for **" + twitch_channel + "**!");
+    } else {
+      for (var key in stream_check_interval_ids) {
+        if (stream_check_interval_ids.hasOwnProperty(key)) {
+          clearInterval(stream_check_interval_ids[key]);
+          stream_check_interval_ids[key] = null;
+        }
+      }
+      bot.sendMessage( msg.channel, "You didn't specify a channel...So I cleared all of the queued auto announcements. ;)");
+    }
+  }
+}
+
+Commands[ "loadEmo" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var twitch_channel = params[1];
+      twitch.getEmotes(twitch_channel, function( data ) {
+        for(var key in data) {
+          if(data.hasOwnProperty(key)) {
+            var obj = data[key];
+            for(var prop in obj) {
+              if(obj.hasOwnProperty(prop)) {
+                var channel_dir = 'resources/emotes/' + twitch_channel;
+                if (!fs.existsSync(channel_dir)){
+                  fs.mkdirSync(channel_dir);
+                }
+                download("http://" + obj[prop].substring(2), "resources/emotes/" + twitch_channel + "/" + prop + ".png", function() {
+                  console.log('Emote successfully loaded from channel.');
+                });
+              }
+            }
+          }
+        }
+      });
+
+      colette.sendMessage( msg.channel, "Got emotes for **" + twitch_channel + "**! Check the console!");
+    } else {
+      twitch.getEmotes("global", function( data ) {
+        for(var key in data) {
+          if (data.hasOwnProperty(key)) {
+            var obj = data[key];
+            for(var prop in obj) {
+              if(obj.hasOwnProperty(prop)) {
+                var global_dir = 'resources/emotes/global';
+                if (!fs.existsSync(global_dir)){
+                  fs.mkdirSync(global_dir);
+                }
+                download("http://" + obj[prop].url.substring(2), "resources/emotes/global/" + prop + ".png", function() {
+                  console.log('Global emotes successfully loaded from channel.');
+                });
+              }
+            }
+          }
+        }
+      });
+
+      bot.sendMessage( msg.channel, "Loaded all of Twitch's global emotes. :)");
+    }
+  }
+}
+
+Commands[ "initEmo" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    Emotes = reloadEmotes();
+    bot.sendMessage(msg.channel, "Emotes reloaded!");
 
   }
 }
 
-Commands[ "ah" ] = {
-  oplevel: 0,
+Commands[ "enEmo" ] = {
+  oplevel: 2,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('ah');
-    var folder = "resources/imagecommands/ah/";
-    var rand = Math.floor(Math.random() * imgz.length)
 
-    bot.sendFile(msg.channel, folder + imgz[rand],imgz[rand]);
-
-
-    bot.sendMessage(msg.channel, "Does it feel good?");
+    EmotesOn = true;
+    bot.sendMessage(msg.channel, "Activated twitch emotes! ");
 
   }
 }
 
-
-Commands[ "booty" ] = {
-  oplevel: 0,
-  allowed_channels: '134854230879109120',
+Commands[ "deEmo" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
   allowed_servers: 'all',
-  cooldown: '5',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('booty'); 
-    var folder = "resources/imagecommands/booty/"; 
-    var rand = Math.floor(Math.random() * imgz.length);
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+    EmotesOn = false;
+    bot.sendMessage(msg.channel, "Deactivated twitch emotes.");
+
   }
 }
 
-Commands[ "dab" ] = {
-  oplevel: 0,
+Commands[ "timeout" ] = {
+  oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('dab'); 
-    var folder = "resources/imagecommands/dab/"; 
-    var rand = Math.floor(Math.random() * imgz.length);
+    if(params[3]) {
+      bot.sendMessage( bot.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!timeout** command only accepts 2 arguments. Tag the user you want to time out, and then the number of seconds!\n\nExample: `!timeout @Colette 10`");
+    } else {
+      colette.deleteMessage(msg);
+      var culprit = params[1].slice(2, -1);
+      var duration = params[2];
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+      bot.addMemberToRole(bot.users.get("id", culprit), serverRoles['Timeout'], function(error){
+        bot.sendMessage(msg.channel, "Timed out <@" + culprit + "> ! RIP.");
+      });
+
+      // If cache exists clear last messages
+      if(msg_c[culprit] != null) {
+        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - 10, 1));
+
+        // delete spam
+        for(var key in d) {
+          colette.deleteMessage(d[key]);
+        }
+      }
+
+      setTimeout(function(){
+        bot.removeMemberFromRole(bot.users.get("id", culprit), serverRoles['Timeout']);
+      }, 1000 * duration);
+    }
   }
 }
 
-
-
-Commands[ "pic" ] = {
-  oplevel: 0,
+// Must finish this command by adding a more persistent cache.
+// Messages are not getting deleted.
+// ONLY PURGES CACHE MESSAGES
+Commands[ "purge" ] = {
+  oplevel: 1,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('pic'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/pic/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
+    if(params[3]) {
+      bot.sendMessage( colette.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!purge** command only accepts 2 arguments. Tag the user you want to time out, and then the number of messages!\n\nExample: `!timeout @Colette 10`");
+    } else {
+      colette.deleteMessage(msg);
+      var culprit = params[1];
+      var n = params[2];
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+      // If cache exists clear last messages
+      if(msg_c[culprit] != null) {
+        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - n, 1));
+
+        // delete spam
+        for(var key in d) {
+          colette.deleteMessage(d[key]);
+        }
+      }
+    }
+  }
+}
+
+Commands[ "enTo" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    auto_time = true;
+    bot.sendMessage(msg.channel, "Turning on automatic timeouts...Time to purge! :fist:");
+
+  }
+}
+
+Commands[ "deTo" ] = {
+  oplevel: 2,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
+    auto_time = false;
+    bot.sendMessage(msg.channel, "Turning off automatic timeouts...:(");
+
   }
 }
 
 Commands[ "rolldice" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 10,
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 8,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var roll = Math.floor(Math.random() * 6) + 1;
 
-    bot.sendMessage(msg.channel, "<@" + msg.author.id + "> rolled a **" + roll + "** !");
-    bot.stopTyping(msg.channel);
+    var roll_types = [];
+    roll_types.push({
+      message: "_rolls the die normally_",
+      timeout: 1
+    });
+    roll_types.push({
+      message: "_rolls the die violently_\n_the die falls on the ground_",
+      timeout: 2
+    });
+    roll_types.push({
+      message: "_accidentally drops the die on the ground while getting ready_\nOops! Still counts right...?",
+      timeout: 2
+    });
+    roll_types.push({
+      message: "_spins the die_\nWait for it...",
+      timeout: 5
+    });
+
+    var rand = roll_types[Math.floor(Math.random() * roll_types.length)];
+
+    bot.sendMessage(msg.channel, rand.message);
+    bot.startTyping(msg.channel);
+
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, "<@" + msg.author.id + "> rolled a **" + roll + "** !");
+      bot.stopTyping(msg.channel);
+    }, 1000 * rand.timeout);
   }
 }
 
-Commands[ "Conchshell" ] = {
+Commands[ "coinflip" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 10,
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 5,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     var flip = Math.floor(Math.random() * 2) + 1;
 
-    flip = ((flip == 1) ? 'Yes' : 'No');
+    flip = ((flip == 1) ? 'Heads' : 'Tails');
 
-    bot.sendMessage(msg.channel, "<@" + msg.author.id + ">  **" + flip + "** .");
-    bot.stopTyping(msg.channel);
+    var flip_types = [];
+    flip_types.push({
+      message: "_accidentally drops the coin on the ground_\n\nOops! ;~; Still counts right?",
+      timeout: 2
+    });
+    flip_types.push({
+      message: "_flips the coin normally_",
+      timeout: 1
+    });
+    flip_types.push({
+      message: "_spins the coin_\nWait for it...",
+      timeout: 5
+    });
+
+    var rand = flip_types[Math.floor(Math.random() * flip_types.length)];
+
+    bot.sendMessage(msg.channel, rand.message);
+    bot.startTyping(msg.channel);
+
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, "<@" + msg.author.id + "> got **" + flip + "** !");
+      bot.stopTyping(msg.channel);
+    }, 1000 * rand.timeout);
   }
 }
 
-Commands[ "Is" ] = {
+Commands[ "love" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 10,
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 8,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var flip = Math.floor(Math.random() * 2) + 1;
-
-    flip = ((flip == 1) ? 'Yes' : 'No');
-
-    bot.sendMessage(msg.channel, "<@" + msg.author.id + ">  **" + flip + "** .");
-    bot.stopTyping(msg.channel);
+    if(params[1]) {
+      var thing = msg.content.slice(6);
+      bot.sendMessage( msg.channel, "There is __**" + Math.floor(Math.random() * 100) + "%**__ love between <@" + msg.author.id + "> and **" + thing + "**!" );
+    } else {
+      bot.sendMessage( msg.channel, "You have 100% for ZeRo & M2K's AS5 if you don't specify an object or person!\n\n_Make sure you put an argument! `!love cheese`_");
+    }
   }
 }
 
-Commands[ "NappaSucks" ] = {
+Commands[ "8ball" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 'none',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 8,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var answers = [];
 
-    bot.sendMessage(msg.channel, "<@" + 83629904356208640 + "> gonna get 9-1'd again?");
+      answers.push({
+        message: "8ball says: \"_It is certain._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_It is decidedly so._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Without a doubt._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Yes, definitely._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_You may rely on it._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_As I see it, yes._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Most likely._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Outlook good._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Yes._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Signs point to yes._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Reply hazy try again._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Ask again later._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Better not tell you now._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_Cannot predict now._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Concentrate and ask again._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Don't count on it._\"",
+        timeout: 3
+      });
+      answers.push({
+        message: "8ball says: \"_My reply is no._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_My sources say no._\"",
+        timeout: 2
+      });
+      answers.push({
+        message: "8ball says: \"_Very doubtful._\"",
+        timeout: 4
+      });
+      answers.push({
+        message: "8ball says: \"_Outlook not so good._\"",
+        timeout: 2
+      });
 
+      var rand = answers[Math.floor(Math.random() * answers.length)];
 
+      bot.startTyping(msg.channel);
+
+      setTimeout(function(){
+        bot.sendMessage(msg.channel, "<@" + msg.author.id + "> " + rand.message);
+        bot.stopTyping(msg.channel);
+      }, 1000 * rand.timeout);
+    } else {
+      bot.sendMessage( msg.channel, "8ball says: \"_Now now, ask me something. Don't be shy._\"");
+    }
   }
 }
 
-Commands[ "RoastWat" ] = {
+Commands[ "seppuku" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 'none',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 5,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+      bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
+    });
 
-    bot.sendMessage(msg.channel, "<@" + "84100810870358016" + "> ur so bad you make monkey's look godlike.");
+    // delete messages and KILL THE
+    if(msg_c[msg.author.id] != null) {
+      var d = msg_c[msg.author.id].slice(Math.max(msg_c[msg.author.id].length - 10, 1));
 
+      // delete spam
+      for(var key in d) {
+        colette.deleteMessage(d[key]);
+      }
+    }
 
+    setTimeout(function(){
+      bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+    }, 5000);
   }
 }
 
-Commands[ "Kitty" ] = {
+Commands[ "roulette" ] = {
   oplevel: 0,
-  allowed_channels: 'all',
+  allowed_channels: [NAIFU_LOVE_LOUNGE],
   allowed_servers: 'all',
-  cooldown: 'none',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 8,
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var answers = [];
-    var imgz = reloadImageCommand('Kitty');
-    var folder = "resources/imagecommands/Kitty/";
-    var rand = Math.floor(Math.random() * imgz.length)
-        
-      bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
-      var answer = "Here's kitty...."
 
-    bot.sendMessage(msg.channel, "<@" + msg.author.id + "> *" + answer +"*");
+    bot.sendMessage(msg.channel, '_Colette grabs a random gun..._\nReady?');
+    bot.startTyping(msg.channel);
+    setTimeout(function(){
+      bot.sendMessage(msg.channel, '_Colette spins the cylinder..._');
 
+      var survival = false;
+
+      setTimeout(function(){
+        if(Math.random() < 0.40) { // 40% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette points the gun at <@' + msg.author.id + '>\'s head..._\n');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_Colette pulls the trigger!_');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "_click_...Yay! You **SURVIVED** <@" + msg.author.id + ">! :D_");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "_BANG!_\n\n_Oh no. How unfortunate, you **DIED** <@" + msg.author.id + ">. You will be remembered. ;~;_");
+                });
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 1000);
+          }, 2000);
+        }
+        else if(Math.random() < 0.70) { // 30% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette pulls the trigger without a second thought..._\n');
+          setTimeout(function(){
+            if(survival) {
+              bot.sendMessage(msg.channel, "POW!...Just kidding! You **SURVIVED** <@" + msg.author.id + ">! :D_");
+            } else {
+              bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                bot.sendMessage(msg.channel, "_BANG!_\n\n_That was actually the gun. You're **DEAD**, <@" + msg.author.id + ">. Rest in pepperoni~_");
+              });
+              setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+              }, 10000);
+            }
+          }, 1000);
+        }
+        else if(Math.random() < 0.90) { // 20% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette trips and falls on the ground._');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_The gun magically comes to life and it pulls its own trigger, aiming directly at you!_');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "_Phew! You swiftly dodged the bullet and **SURVIVED** <@" + msg.author.id + ">! The gun glares at you and disappears._");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "Ow...O-oh no! **YOU GOT DUNKED ON** <@" + msg.author.id + "> !\n\n_The gun laughs and disappears into the darkness._");
+                });
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 2000);
+          }, 1000);
+        }
+        else { // 10% Chance of this happening!
+          if(Math.random() < 0.50) {
+            survival = true;
+          }
+
+          bot.sendMessage(msg.channel, '_Colette puts down the gun and casts Judgement._');
+          setTimeout(function(){
+            bot.sendMessage(msg.channel, '_Rays of light descend all over the server!_');
+            bot.sendFile(msg.channel, 'resources/images/holy_judgement.png', 'holy_judgement.png');
+            setTimeout(function(){
+              if(survival) {
+                bot.sendMessage(msg.channel, "Oh phew..., good job dodging that! You **SURVIVED** <@" + msg.author.id + "> ! I never land that move anyways :blush: ");
+              } else {
+                bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+                  bot.sendMessage(msg.channel, "O-oops...I messed up...**YOUR BODY IS GONE** ;~;, <@" + msg.author.id + "> ! Rest in pieces :cry:");
+                });
+
+                setTimeout(function(){
+                  bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+                }, 10000);
+              }
+            }, 2000);
+          }, 1000);
+        }
+        bot.stopTyping(msg.channel);
+      }, 2000);
+    }, 1000);
   }
 }
 
-Commands[ "Waifu" ] = {
-  oplevel: 7,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('Waifu'); 
-    var folder = "resources/imagecommands/Waifu/";
-    var rand = Math.floor(Math.random() * imgz.length);
-    var answer 
-    answer = 'Your waifu is....'
+/* === SPECIAL: COLOR COMMANDS! === */
+// Commands[ "setColor" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE],
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[2]) {
+//       bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**(for the fancy peeps)\n\nExample: `!setColor mistyrose`");
+//     } else {
+//       if(params[1]) {
+//         var userHasXMAS = false;
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+//         for (var key in authorRoles) {
+//           if(authorRoles.hasOwnProperty(key)) {
+//             if(authorRoles[key]['name'].substring(0, 4) === 'VAL:'){
+//               userHasXMAS = true;
+//             }
+//           }
+//         }
 
-    bot.sendMessage(msg.channel, "<@" + msg.author.id + "> **" + answer + "**");
+//         var assignXMASRole = function(){
+//           var color = params[1];
 
-  }
-}
+//           switch(color) {
+//             case 'red':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:RED'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to red! :blue_heart:");
+//               });
+//               break;
+//             case 'lightpink':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:LIGHTPINK'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to light pink! :blue_heart:");
+//               });
+//               break;
+//             case 'hotpink':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:HOTPINK'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to hot pink! *hawt* :blue_heart:");
+//               })
+//               break;
+//             case 'crimson':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:CRIMSON'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to crimson! :blue_heart:");
+//               })
+//               break;
+//             case 'mistyrose':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:MISTYROSE'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to misty rose (fancy :o)! ^-^ :blue_heart:");
+//               })
+//               break;
+//             case 'lavender':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:LAVENDER'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to lavender! ^-^ :blue_heart:");
+//               })
+//               break;
+//             case 'skyblue':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:SKYBLUE'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to sky blue! ^-^ :blue_heart:");
+//               })
+//               break;
+//             case 'violet':
+//               bot.addMemberToRole(msg.author, serverRoles['VAL:VIOLET'], function(error){
+//                 bot.sendMessage(msg.channel, "Successfully set your color to violet! ^-^ :blue_heart:");
+//               })
+//               break;
+//             default:
+//               bot.sendMessage(msg.channel, "Sorry ;_; That color isn't available.\nThe available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**");
+//               break;
+//           }
+//         }
 
-Commands[ "Funny" ] = {
-  oplevel: 0,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var imgz = reloadImageCommand('Funny'); 
-    var folder = "resources/imagecommands/Funny/";
-    var rand = Math.floor(Math.random() * imgz.length);
+//         if(userHasXMAS){
+//           bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+//         } else {
+//           assignXMASRole();
+//         }
+//       } else {
+//         bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**");
+//       }
+//     }
+//   }
+// }
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
-  }
-}
+// Commands[ "loadColors" ] = {
+//   oplevel: 2,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[1]) {
+//       bot.sendMessage( msg.channel, "No parameters needed~");
+//     } else {
 
-Commands[ "Joke" ] = {
-  oplevel:0,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    var answers = [];
-    answers.push({
-      message: "What whould happen if the pilgrims had killed cats instead of turkeys?\nWe'd eat pussy every thanksgiving"
-    })
-    answers.push({
-      message: "Q. What doesn't belong in this list : Meat, Eggs, Wife, Blowjob? A. Blowjob: You can beat your meat, eggs or wife, but you can't beat a blowjob."
-    })
-   
-    answers.push({
-      message: "Q. What do you call a dog with no legs?\n you can call it anything it wont come."
-    })
-    answers.push({
-      message: "What does a dum call a dumpster.\n Bed and Breakfast"
-    })
-    answers.push({
-      message: "Q: What did the doughnut say to the loaf of bread? A: If I had that much dough, I wouldn't be hanging around this hole."
-    })
-    answers.push({
-      message: "Q: What do you call cheese that isnt yours?\n A: Nacho cheese"
-    })
-    answers.push({
-      message: "I asked my grandma if she had ever tried 69.\n She said, No, but I have done 53 -- that's all the sailors I could screw in one night."
-    }) 
-    answers.push({
-      message: "Why don't witches wear undies?\n To get a better grip on their brooms."
-    })
-    answers.push({
-      message: "You're so stupid that you had to call 411 to get the number for 911."
-    })
-    answers.push({
-      message: "A man cheats on his girlfriend Lorraine with a woman named Clearly.\nLorraine dies suddenly.\nAt the funeral, the man stands up and sings, I can see Clearly now, Lorraine is gone."
-    })
-    answers.push({
-      message: "Q: Why did the forgetful chicken cross the road?\nA: To get to the other side -- er, no -- to go shopping -- no, not that either -- damn it."
-    })
-    answers.push({
-      message: "Q: Why did the calf cross the road?\nA: To get to the udder side."
-    })
-    answers.push({
-      message: "Q: Why did the one-handed man cross the road?\nA: To get to the second hand shop."
-    })
-    answers.push({
-      message: "Q: Why did the monkey cross the road?\nA: So he could get spanked."
-    })
-    answers.push({
-      message: "What's pink, 6 inches long, and makes my girlfriend cry when I put it in her mouth? Her miscarriage."
-    })
-     answers.push({
-      message: "What's the difference between a Taliban outpost and a Pakistani elementary school?\nI don't know, I just fly the drone!"
-    })
-   
-    var rand = Math.floor(Math.random() * answers.length)
+//       var red = 0xB22222;
+//       var lightpink = 0xFFB6C1;
+//       var hotpink = 0xFF69B4;
+//       var crimson = 0xDC143C;
+//       var mistyrose = 0xFFCCCC;
+//       var lavender = 0xbbbbdd;
+//       var skyblue = 0x9DEBE9;
+//       var violet = 0x800080;
 
-    bot.sendMessage(msg.channel, "*" + answers[rand].message + "*")
-  }
-}
+//       for (var key in serverRoles) {
+//         if(serverRoles.hasOwnProperty(key)) {
+//           switch(serverRoles[key]['name']) {
+//             case 'VAL:RED':
+//               bot.updateRole(serverRoles[key], {color: red});
+//               break;
+//             case 'VAL:LIGHTPINK':
+//               bot.updateRole(serverRoles[key], {color: lightpink});
+//               break;
+//             case 'VAL:HOTPINK':
+//               bot.updateRole(serverRoles[key], {color: hotpink});
+//               break;
+//             case 'VAL:CRIMSON':
+//               bot.updateRole(serverRoles[key], {color: crimson});
+//               break;
+//             case 'VAL:MISTYROSE':
+//               bot.updateRole(serverRoles[key], {color: mistyrose});
+//               break;
+//             case 'VAL:LAVENDER':
+//               bot.updateRole(serverRoles[key], {color: lavender});
+//               break;
+//             case 'VAL:SKYBLUE':
+//               bot.updateRole(serverRoles[key], {color: skyblue});
+//               break;
+//             case 'VAL:VIOLET':
+//               bot.updateRole(serverRoles[key], {color: violet});
+//               break;
+//           }
+//         }
+//       }
+//       bot.sendMessage( msg.channel, "Colors of LURRRVE loaded! All set and ready to go. :D :heart:");
+//     }
+//   }
+// }
+
+// Commands[ "unset" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE],
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[1]) {
+//       bot.sendMessage( msg.channel, "Just type in `!unset`. No color needed!");
+//     } else {
+//       var userHasXMAS = false;
+
+//       for (var key in authorRoles) {
+//         if(authorRoles.hasOwnProperty(key)) {
+//           if(authorRoles[key]['name'].substring(0, 4) === 'VAL:'){
+//             userHasXMAS = true;
+//             bot.removeMemberFromRole(msg.author, authorRoles[key]);
+//           }
+//         }
+//       }
+
+//       if(userHasXMAS){
+//         bot.sendMessage(msg.channel, "Color's cleared. :) You can set your color now with the !setColor command!");
+//       } else {
+//         bot.sendMessage(msg.channel, "You didn't seem to have a color! Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**\n\nExample: `!setColor hotpink`");
+//       }
+//     }
+//   }
+// }
+
+// Commands[ "colorhelp" ] = {
+//   oplevel: 0,
+//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**\n\nExample: `!setColor mistyrose`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Have a fun Valentine's Week. ;)");
+//   }
+// }
+
+/** END COLOR INTEGRATION **/
+
+/**
+ * ***********************************************
+ * END COMMANDS
+ * ***********************************************
+ */
 
 
-Commands[ "Kappa" ] = {
-   oplevel: 0,
-   allowed_channels: 'all',
-   allowed_servers: 'all',
-  cooldown: '1',
-   fn: function( bot, msg, msgServer) {
-    var answers = [];
-    var imgz = reloadImageCommand('Kappa'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/Kappa/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
-
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
-  }
-}
-
-
-Commands[ "Help" ] = {
-  oplevel: 0,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    
-    bot.sendMessage(msg.channel, "`Here's a list of all of the current commands!\nBitch, oplevel:2.\nPong, oplevel:2.\nMake4NoticeMe, oplevel:0.\ngcid oplevel:2.\nguid, oplevel:2.\ngsid, oplevel:2.\nsetName, oplevel:2.\nAiga, oplevel:0.\nrnh oplevel:0.\nah, oplevel:0.\nbooty, oplevel:0 (Restricted to #Booty).\ndab, oplevel:0.\nrolldice, oplevel:0.\nConchshell, oplevel:0.\nIs, oplevel:0.\nNappasucks, oplevel:0.\nRoastWat, oplevel:0.\nKitty, oplevel:0.\nWaifu, oplevel:0.\nFunny, oplevel:0.\nJoke, oplevel:0.(WARNING, The joke command conatins nsfw dirty and dark humor jokes. If you are faint-hearted or easily offended do not use this command)\nWhat does oplevel mean, OpLevel is simply who is able to and who isnt able to use certain commands, 0 = Anyone , 1 = Admins , 2 = Only Mai can use it. If any command is restricted to a channel or server it will be stated`");
-  }
-}
-
-
- 
-// Array of all reactions.
+/**
+ * REACTIONS ARRAY
+ * Holds REACTION objects.
+ * Defines actions taken when certain words are found in messages.
+ * @type {Array}
+ */
 var Reactions = [];
 
 /**
- * Reactions
+ * Reactions Description
  * -- oplevel: The restriction of who can use the command.
  *  - 0 -> Anyone can use the command.
  *  - 1 -> Only ADMINS can use the command. (All user IDs in the ADMINS array above)
  *  - 2 -> Only the GOD can use the command. (The GOD ID in the variable above)
- *  
+ *
  * -- allowed_channels: Channels in which the command works.
  *  - 'all' -> Will work in all channels.
  *  - [CHANNEL_ID_1, CHANNEL_ID_2, ...] -> Array of all channel IDs where the command will work.
@@ -562,143 +1216,203 @@ var Reactions = [];
  *   - authorRoles -> All roles of the author that invoked the command.
  */
 
-
-
-Reactions[ "Do you love me?" ] = {
+Reactions[ "colette" ] = {
   oplevel: 0,
   allowed_channels: 'all',
   allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
   cooldown: 'none',
   fn: function( bot, msg, msgServer ) {
 
+    if(Math.random() < 0.10) {
       var answers = [];
       answers.push({
-        message: "HELL NO!"
+        message: ">_>*"
       });
       answers.push({
-        message: "I mean, you're nice and all."
+        message: "_trips and falls on the floor_"
       });
       answers.push({
-        message: "M-maybe"
+        message: ":blue_heart:"
       });
       answers.push({
-        message: "..."
+        message: "Mushbot's pretty cute~"
       });
       answers.push({
-        message: "WHAT YOU ARE DOING IN MY ROOM? GET OUT YOU PERVERT!"
-      });
-
-     var answer = answers[Math.floor(Math.random() * answers.length)];
-      bot.sendMessage(msg.channel, answer.message);
-      }
-    }
-
-
-Reactions[ "Fuck you" ] = {
-  oplevel: 0,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  cooldown: 'none',
-  fn: function( bot, msg, msgServer ) {
-
-      var answers = [];
-      answers.push({
-        message: "What did you say to me :hocho:"
-      });
-      answers.push({
-        message: "Ha, fuck me? Thats what your mom told me last night!"
-      });
-      answers.push({
-        message: "W-wow, what did I do to you?;~;"
-      });
-      answers.push({
-        message: "Hmph...."
-      });
-      answers.push({
-        message: "Oh shut up already"
+        message: "Fuck you too...I-I mean I'm sorry."
       });
 
       var answer = answers[Math.floor(Math.random() * answers.length)];
       bot.sendMessage(msg.channel, answer.message);
-      
-
-
+    }
   }
 }
 
+Reactions[ "jace" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: [NAIFU_SERVER],
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 60,
+  fn: function( bot, msg, msgServer ) {
 
-Reactions[ "Kappa" ] = {
-   oplevel: 0,
-   allowed_channels: 'all',
-   allowed_servers: 'all',
-  cooldown: '1',
-   fn: function( bot, msg, msgServer) {
-    var answers = [];
-    var imgz = reloadImageCommand('Kappa'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/Kappa/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
+    if(Math.random() < 0.01) {
+      var answers = [];
+      answers.push({
+        message: "Jace?...You mean **Tear**, right? :O"
+      });
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      //bot.sendMessage(msg.channel, answer.message);
+      if(answer.filename) {
+        //bot.sendFile(msg.channel, 'resources/images/' + answer.filename, answer.filename);
+      }
+    }
   }
 }
 
-Reactions[ "Keepo" ] = {
-   oplevel: 0,
-   allowed_channels: 'all',
-   allowed_servers: 'all',
-  cooldown: '1',
-   fn: function( bot, msg, msgServer) {
-    var answers = [];
-    var imgz = reloadImageCommand('Keepo'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/Keepo/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
+Reactions[ "aero" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 60,
+  fn: function( bot, msg, msgServer ) {
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+    if(Math.random() < 0.05) {
+      var answers = [];
+      answers.push({
+        message: "Aeruuuuuuuuuuu :blue_heart:"
+      });
+      answers.push({
+        message: "Dole me back!"
+      });
+      answers.push({
+        message: "Aero is the #1 most cute person in the Naifus. :blue_heart:"
+      });
+      answers.push({
+        message: "AEWO?! RUH ROH!"
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
   }
 }
 
-Reactions[ "Kreygasm" ] = {
-   oplevel: 0,
-   allowed_channels: 'all',
-   allowed_servers: 'all',
-  cooldown: '1',
-   fn: function( bot, msg, msgServer) {
-    var answers = [];
-    var imgz = reloadImageCommand('Kreygasm'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/Kreygasm/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
+Reactions[ "pere" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 60,
+  fn: function( bot, msg, msgServer ) {
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+    if(Math.random() < 0.05) {
+      var answers = [];
+      answers.push({
+        message: ":fish: :lemon: :eyes: :blue_heart:"
+      });
+      answers.push({
+        message: "PERE?! ASFKWTVSAKLW"
+      });
+      answers.push({
+        message: "Gotta love momma peweden :blue_heart:"
+      });
+      answers.push({
+        message: "hOI!! pEreTEM!!!"
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      //bot.sendMessage(msg.channel, answer.message);
+    }
   }
 }
 
-Reactions[ "KappaPride" ] = {
-   oplevel: 0,
-   allowed_channels: 'all',
-   allowed_servers: 'all',
-  cooldown: '1',
-   fn: function( bot, msg, msgServer) {
-    var answers = [];
-    var imgz = reloadImageCommand('KappaPride'); // Loads all images from the said folder found in "/resources/imagecommands"
-    var folder = "resources/imagecommands/KappaPride/"; // Folder to get pictures from. Must be the same name as the command.
-    var rand = Math.floor(Math.random() * imgz.length);
+Reactions[ "aiga" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: [NAIFU_SERVER],
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 60,
+  fn: function( bot, msg, msgServer ) {
+    // @todo include time of mention in EST
+    bot.sendMessage(AIGA_MENTIONS, "Looks like you got mentioned! Here's the info...\n\nServer : **"+ msgServer +"**\nChannel : **"+ msg.channel.name + "**\nUser : **" + msg.author.username + "**\nUserID : **" + msg.author.id + "**\nMessage : _\""+ msg.content +"\"_");
 
-    bot.sendFile(msg.channel, folder + imgz[rand], imgz[rand]);
+    if(Math.random() < 0.02) {
+      var answers = [];
+      answers.push({
+        message: "who's aiga?"
+      });
+      answers.push({
+        message: "Aiga's never here smh..."
+      });
+      answers.push({
+        message: ":eyes:gachu"
+      });
+      answers.push({
+        message: "eat shit aiga"
+      });
+      answers.push({
+        message: "Aiga says he's going to replace me with a better bot. ;_;"
+      });
+
+      var answer = answers[Math.floor(Math.random() * answers.length)];
+      bot.sendMessage(msg.channel, answer.message);
+    }
   }
 }
+/**
+ * ***********************************************
+ * END REACTIONS
+ * ***********************************************
+ */
 
+/**
+ * PRECISE REACTIONS ARRAY
+ * Holds REACTION objects.
+ * Defines actions taken when certain words are found in messages.
+ * @type {Array}
+ */
+// var PReactions = [];
 
-//Clev
+// Reactions[ "ai" ] = {
+//   oplevel: 0,
+//   allowed_channels: 'all',
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, msg, msgServer ) {
+//     var answers = [];
+//     answers.push({
+//       message: "Got em~"
+//     });
 
+//     var answer = answers[Math.floor(Math.random() * answers.length)];
+//     bot.sendMessage(msg.channel, answer.message);
+//   }
+// }
 
+/**
+ * ***********************************************
+ * END PRECISE REACTIONS
+ * ***********************************************
+ */
+
+/* ***************************************|||||||||||||||||||||||*************************************************** */
+/* *************************************** MESSAGE EVENT ACTIONS *************************************************** */
+/* ***************************************|||||||||||||||||||||||*************************************************** */
 
 /**
  * === EVENT : Message Creation (Sent)  ===
- * *******************************************************************
- * DO NOT CHANGE ANYTHING IN HERE UNLESS YOU KNOW WHAT YOU'RE DOING!!!
- * *******************************************************************
  */
-dbot.on("message", function (msg) {
+colette.on("message", function (msg) {
   // Log Messages for DEV purposes
   // console.log(msg);
 
@@ -709,13 +1423,116 @@ dbot.on("message", function (msg) {
     var authorRoles = msg.channel.server.rolesOfUser(msg.author);
   }
 
-  // Commands
-  // DO NOT TOUCH UNLESS YOU KNOW WHAT YOU'RE DOING.
+  /**
+   * *******************************************************
+   * AUTOMATIC TIMEOUTS STARTS
+   * *******************************************************
+   */
+  if(auto_time) {
+    if(msg.author.id != colette.user.id) {
+      // User Message Cache
+      if(msg_c[msg.author.id] == null) { // If user's message cache is cleared/empty
+        msg_c[msg.author.id] = []; // Initiate message cache.
+        msg_cc[msg.author.id] = setTimeout(function(){
+          // After a delay, clear the cache.
+          msg_c[msg.author.id] = null;
+        }, 1000 * 30);
+      }
+
+      // Add message to the user's message cache.
+      msg_c[msg.author.id].push(msg);
+
+      // If the message cache is bigger than just 1 message.
+      if(msg_c[msg.author.id].length > 1) {
+
+        // QuickSpam Functionality
+        // if(qspam_c[msg.author.id] == null) {
+        //   qspam_c[msg.author.id] = [];
+        // }
+
+        // qspam_c[msg.author.id].push(msg);
+
+        // qspam_cc = setTimeout(function(){
+        //   qspam_c[msg.author.id] = null;
+        // }, 900);
+
+        // if(qspam_c[msg.author.id].length >= 3) {
+        //   // Assign 'Timeout' role.
+        //   colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+        //   colette.sendMessage(msg.channel, "BAN HAMMER TO SMASH THE SPAMMER <@" + msg.author.id + "> ! >:O !!!");
+        //   colette.sendFile(msg.channel, 'resources/images/ban_hammer.png', 'judgement.png');
+
+        //   // delete spam
+        //   for(var key in qspam_c[msg.author.id]) {
+        //     colette.deleteMessage(qspam_c[msg.author.id][key]);
+        //   }
+
+        //   spam_c[msg.author.id] = null;
+        //   qspam_c[msg.author.id] = null;
+        //   setTimeout(function(){
+        //     colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+        //   }, 1000 * 5);
+        //   clearTimeout(spam_cc[msg.author.id]);
+        //   clearTimeout(qspam_cc[msg.author.id]);
+        // }
+
+        // Normal Spam Functionality.
+        // Push to spam array if it's same message as last
+        // var lastMsg = msg_c[msg.author.id][msg_c[msg.author.id].length - 2];
+
+        // if(msg.content === lastMsg.content) {
+        //   if(spam_c[msg.author.id] == null) {
+        //     spam_c[msg.author.id] = [];
+        //     // push the first message into this array if it must get deleted
+        //     //spam_c[msg.author.id].push(lastMsg);
+        //   }
+
+        //   clearTimeout(spam_cc[msg.author.id]);
+        //   spam_cc[msg.author.id] = null;
+        //   spam_cc[msg.author.id] = setTimeout(function(){
+        //     spam_c[msg.author.id] = null;
+        //   }, 1000 * 10);
+        //   spam_c[msg.author.id].push(msg);
+
+        //   if(spam_c[msg.author.id].length >= 4) {
+        //     // Assign 'Timeout' role.
+        //     colette.addMemberToRole(msg.author, serverRoles['Timeout']);
+        //     colette.sendMessage(msg.channel, "Oops! My hands slipped and I _**accidentally**_ timed out <@" + msg.author.id + "> :P (NO SPAM!) !");
+        //     colette.sendFile(msg.channel, 'resources/images/judgement.png', 'judgement.png');
+
+        //     // delete spam
+        //     for(var key in spam_c[msg.author.id]) {
+        //       colette.deleteMessage(spam_c[msg.author.id][key]);
+        //     }
+        //     spam_c[msg.author.id] = null;
+        //     msg_c[msg.author.id] = null;
+        //     setTimeout(function(){
+        //       colette.removeMemberFromRole(msg.author, serverRoles['Timeout']);
+        //     }, 1000 * 10);
+        //     clearTimeout(spam_cc[msg.author.id]);
+        //   }
+        // }
+      }
+
+    }
+  }
+
+  /**
+   * *******************************************************
+   * AUTOMATIC TIMEOUTS END
+   * *******************************************************
+   */
+
+  /**
+   * *******************************************************
+   * COMMANDS HANDLING START
+   * *******************************************************
+   */
   for (var key in Commands) {
     if (Commands.hasOwnProperty(key)) {
       var params = msg.content.split(" "); // Divide text into distinct parameters.
       var command = params[0].toUpperCase();
-      if(command === (CommandPrefix + key).toUpperCase() && msg.author.id !== dbot.user.id) {
+      if(command === (CommandPrefix + key).toUpperCase() && msg.author.id !== colette.user.id) {
 
         var DENIAL_FLAG = false; // handles approval if needed
 
@@ -749,11 +1566,11 @@ dbot.on("message", function (msg) {
          if(COOLDOWNS[key]) {
           DENIAL_FLAG = true;
           if(!COOLDOWNS['announce_cd_' + key]) {
-            dbot.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds.");
+            colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
             COOLDOWNS['announce_cd_' + key] = true;
             removeCooldown('announce_cd_' + key);
           }
-          dbot.deleteMessage(msg);
+          colette.deleteMessage(msg);
          } else {
           COOLDOWNS[key] = true;
           removeCooldown(key);
@@ -762,21 +1579,29 @@ dbot.on("message", function (msg) {
 
         // Run Command if it passed approval.
         if(!DENIAL_FLAG) {
-          Commands[key].fn(dbot, params, msg, msgServer, serverRoles, authorRoles);
+          Commands[key].fn(colette, params, msg, msgServer, serverRoles, authorRoles);
         }
       }
     }
   }
+  /**
+   * *******************************************************
+   * COMMANDS HANDLING END
+   * *******************************************************
+   */
 
 
 
-  // Reactions
-  // Same as commands, but do not require a prefix (and tend to have cooldowns)
-  // DO NOT TOUCH UNLESS YOU KNOW WHAT YOU'RE DOING.
+  /**
+   * *******************************************************
+   * REACTIONS HANDLING START
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
   for (var key in Reactions) {
     if (Reactions.hasOwnProperty(key)) {
       var keygex = new RegExp(key, "i");
-      if( keygex.test(msg.content) && msg.author.id !== dbot.user.id) {
+      if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
 
         var DENIAL_FLAG = false; // handles validation if needed
 
@@ -817,11 +1642,92 @@ dbot.on("message", function (msg) {
 
         // Run Command if it passed approval.
         if(!DENIAL_FLAG) {
-          Reactions[key].fn(dbot, msg, msgServer);
+          Reactions[key].fn(colette, msg, msgServer);
         }
       }
     }
   }
+  /**
+   * *******************************************************
+   * REACTIONS HANDLING END
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
+
+  /**
+   * *******************************************************
+   * PRECISE REACTIONS HANDLING START
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
+
+  // for (var key in PReactions) {
+  //   if (PReactions.hasOwnProperty(key)) {
+  //     if( msg.content.indexOf(key) > -1 && ( msg.content[msg.content.indexOf(key) - 1] === " " || msg.content[msg.content.indexOf(key) - 1] === null) && msg.author.id !== colette.user.id) {
+
+  //       var DENIAL_FLAG = false; // handles validation if needed
+
+  //       // Check OP Level
+  //       if(PReactions[key].oplevel === 2) {
+  //         if(!isGodMessage(msg)) {
+  //           DENIAL_FLAG = true;
+  //         }
+  //       } else if(PReactions[key].oplevel === 1) {
+  //         if(!isAdminMessage(msg)) {
+  //           DENIAL_FLAG = true;
+  //         }
+  //       }
+
+  //       // Check Allowed Servers
+  //       if(PReactions[key].allowed_servers !== 'all') {
+  //         if(PReactions[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
+  //           DENIAL_FLAG = true;
+  //         }
+  //       }
+
+  //       // Check Allowed Channels
+  //       if(PReactions[key].allowed_channels !== 'all') {
+  //         if(PReactions[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+  //           DENIAL_FLAG = true;
+  //         }
+  //       }
+
+  //       // Check Cooldown (if any)
+  //       if(PReactions[key].cooldown !== 'none') {
+  //        if(COOLDOWNS[key]) {
+  //         DENIAL_FLAG = true;
+  //        } else {
+  //         COOLDOWNS[key] = true;
+  //         removeCooldown(key);
+  //        }
+  //       }
+
+  //       // Run Command if it passed approval.
+  //       if(!DENIAL_FLAG) {
+  //         PReactions[key].fn(colette, msg, msgServer);
+  //       }
+  //     }
+  //   }
+  // }
+  /**
+   * *******************************************************
+   * PREACTIONS HANDLING END
+   * Same as commands, but do not require a prefix (and tend to have cooldowns)
+   * *******************************************************
+   */
+
+  // Emotes
+  if(EmotesOn) {
+    for (var key in Emotes) {
+      if(Emotes.hasOwnProperty(key)) {
+        var keygex = new RegExp(key, "i");
+        if( keygex.test(msg.content) && msg.author.id !== colette.user.id) {
+          colette.sendFile(msg.channel, Emotes[key], key + ".png");
+        }
+      }
+    }
+  }
+
 
 }); // END REACTIONS TO "message" EVENT
 
@@ -832,9 +1738,9 @@ dbot.on("message", function (msg) {
  * @todo  Will soon have similar commands to the message events.
  * @todo  Will soon log deleted messages. (THIS IS POLICE AS FUCK.)
  */
-dbot.on("messageDelete", function (channel, msg) {
+colette.on("messageDelete", function (channel, msg) {
 
-  console.log("MESSAGE WAS DELETED BY " + (msg ? msg.author.username : channel.name));
+  //console.log("MESSAGE WAS DELETED BY " + (msg ? msg.author.username : channel.name));
 
 });
 
@@ -845,9 +1751,9 @@ dbot.on("messageDelete", function (channel, msg) {
  * @todo  Will soon have similar commands to the message events.
  * @todo  Will soon log edited messages. (THIS IS POLICE AS FUCK.)
  */
-dbot.on("messageUpdate", function (msg, formerMsg) {
+colette.on("messageUpdate", function (msg, formerMsg) {
 
-  console.log(msg.author.username, "changed", formerMsg.content, "to", msg.content);
+  //console.log(msg.author.username, "changed", formerMsg.content, "to", msg.content);
 
 });
 
@@ -857,8 +1763,13 @@ dbot.on("messageUpdate", function (msg, formerMsg) {
  * === EVENT : User Addition to Server ===
  * @todo  Will soon send which server it happened on as well.
  */
-dbot.on("serverNewMember", function (server, user) {
-  console.log("new user", user);
+colette.on("serverNewMember", function (server, user) {
+  //console.log("new user", user);
+
+  if(server.id != AIGA_HAVEN) {
+    // PM me about server removals adds.
+    colette.sendMessage(AIGA_NEWCOMERS, "Looks like we have a newcomer in the **"+ server.name +"** server: **" + user.username + "**");
+  }
 });
 
 /********************************************************************************************/
@@ -867,8 +1778,13 @@ dbot.on("serverNewMember", function (server, user) {
  * === EVENT : User Removal from Server ===
  * @todo Will soon send which server it happened on as well.
  */
-dbot.on("serverMemberRemoved", function (server, user) {
-  console.log("left user", user);
+colette.on("serverMemberRemoved", function (server, user) {
+  //console.log("left user", user);
+
+  if(server.id != AIGA_HAVEN) {
+    // PM me about server removals.
+    colette.sendMessage(AIGA_REMOVALS, "Whoa yikes! The following user was removed from the **" + server.name + "** server: **" + user.username + "**");
+  }
 });
 
 /********************************************************************************************/
@@ -876,8 +1792,16 @@ dbot.on("serverMemberRemoved", function (server, user) {
 /**
  * === EVENT : User Information Change ===
  */
-dbot.on("userUpdate", function (oldUser, newUser) {
-  console.log(oldUser, "vs", newUser);
+colette.on("userUpdate", function (oldUser, newUser) {
+  //console.log(oldUser, "vs", newUser);
+
+  // Send name change information to me in PMs
+  if(oldUser.username !== newUser.username) {
+    colette.sendMessage(AIGA_NC, "Name change logged. :) Here's the information:\nUser's ID: **" + oldUser.id + "**\n\nOld Name: **" + oldUser.username + "**\nNew Name: **" + newUser.username + "**\n-------------------------------");
+  }
+
+  // Log name change information in files.
+  // @TODO
 });
 
 /********************************************************************************************/
@@ -885,22 +1809,19 @@ dbot.on("userUpdate", function (oldUser, newUser) {
 /**
  * === EVENT : Channel Creation ===
  */
-dbot.on("channelCreate", function(chann){
-  console.log(chann);
+colette.on("channelCreate", function(chann){
+  //console.log(chann);
 })
 
 /********************************************************************************************/
 
 /* === Useful Functions === */
-/* ******************************************************************* */
-/* === ONLY TOUCH IF YOU KNOW WHAT YOU'RE DOING!!! === */
-/* ******************************************************************* */
 
 // Check invoker. If it's you, roll the command.
 // @TODO - ROLE HANDLING INSTEAD OF ACCOUNT ID
 function isGodMessage(message) {
   var author_id = message.author.id;
-  if(author_id == GOD) {
+  if(author_id == GOD_ID) {
     return true;
   } else {
     return false;
@@ -910,7 +1831,7 @@ function isGodMessage(message) {
 // Check invoker. If it's a god, roll the command.
 function isAdminMessage(message) {
   var author_id = message.author.id;
-  if(ADMINS.indexOf(author_id) > -1 || author_id == GOD) {
+  if(ADMINS.indexOf(author_id) > -1 || author_id == GOD_ID) {
     return true;
   } else {
     return false;
@@ -921,23 +1842,39 @@ function isAdminMessage(message) {
 // PM admin (aka me)
 function pmme(message) {
   // Might be able to change this to a user for the channel resolvable.
-  dbot.sendMessage(dbot.users.get("id", GOD), message);
+  colette.sendMessage(colette.users.get("id", GOD_ID), message);
+}
+
+// Function used to return channels for respective servers.
+function getServerChannel(serverName, channelName) {
+  return colette.servers.get("name", serverName).channels.get("name", channelName);
+}
+
+// Utility Function - download
+// Downloads file from url
+
+function download(uri, filename, callback) {
+  request.head(uri, function(err, res, body){
+    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+  });
 }
 
 // Reload Emotes
-function reloadImageCommand(folder) {
-  var f = [];
+function reloadEmotes() {
+  var e = [];
 
-  var ifolder = "resources/imagecommands/" + folder;
-  var files = fs.readdirSync(ifolder) ;
+  var efolders = fs.readdirSync("resources/emotes");
 
-  for(var i in files) {
-    f.push(files[i]);
+  for(var key in efolders) {
+    var files = fs.readdirSync("resources/emotes/" + efolders[key]) ;
+    for(var i in files) {
+      e[files[i].slice(0, -4)] = "resources/emotes/" + efolders[key] + "/" + files[i];
+    }
   }
 
-  console.log("Images reloaded for " + folder + " command.");
+  console.log("Emotes reloaded.");
 
-  return f;
+  return e;
 }
 
 // Remove cooldown after delay.
