@@ -131,9 +131,6 @@ var stream_check_interval_ids = [];
 // Default Announcement Channel
 var ANN_CHANNEL = 'announcements';
 
-// Default General Channel
-var GENERAL_CHANNEL = 'general';
-
 // Command/Reactions Cooldowns
 var COOLDOWNS = [];
 
@@ -277,7 +274,7 @@ Commands[ "guid" ] = {
   cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
-      var userID = params[1].slice(2, -1);
+      var userID = exID(params[1]);
       var user = bot.users.get("id", userID);
       bot.deleteMessage(msg);
       bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the following user: **" + user.username + "**\n\n**" + userID + "**");
@@ -304,23 +301,6 @@ Commands[ "setName" ] = {
       bot.sendMessage( msg.channel, "Changing my name!");
     } else {
       bot.sendMessage( msg.channel, "Change it to what?...I can't change it to blank. -_-");
-    }
-  }
-}
-
-Commands[ "setGeneral" ] = {
-  oplevel: 2,
-  allowed_channels: 'all',
-  allowed_servers: 'all',
-  excluded_channels: 'none',
-  excluded_servers: 'none',
-  cooldown: 'none',
-  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-    if(params[1]) {
-      GENERAL_CHANNEL = params[1];
-      bot.sendMessage( msg.channel, "Gotcha! The general channel has been changed to **" + GENERAL_CHANNEL + "**!");
-    } else {
-      bot.sendMessage( msg.channel, "Aigaaa...Don't mess with me. That's blank. -_-");
     }
   }
 }
@@ -587,7 +567,6 @@ Commands[ "timeout" ] = {
 // Must finish this command by adding a more persistent cache.
 // Messages are not getting deleted.
 // ONLY PURGES CACHE MESSAGES
-// CURRENTLY DOESN'T WORK BUT I DON'T REALLY CARE FOR NOW
 Commands[ "purge" ] = {
   oplevel: 1,
   allowed_channels: 'all',
@@ -600,12 +579,12 @@ Commands[ "purge" ] = {
       bot.sendMessage( colette.users.get("id", msg.author.id), "Psst...You might have messed up somewhere with the command...\n\nThe **!purge** command only accepts 2 arguments. Tag the user you want to time out, and then the number of messages!\n\nExample: `!timeout @Colette 10`");
     } else {
       colette.deleteMessage(msg);
-      var culprit = params[1];
+      var culprit = exID(params[1]);
       var n = params[2];
 
       // If cache exists clear last messages
       if(msg_c[culprit] != null) {
-        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - n, 1));
+        var d = msg_c[culprit].slice(Math.max(msg_c[culprit].length - n + 1, 1));
 
         // delete spam
         for(var key in d) {
@@ -613,6 +592,34 @@ Commands[ "purge" ] = {
         }
       }
     }
+  }
+}
+
+Commands[ "seppuku" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 5,
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.addMemberToRole(bot.users.get("id", msg.author.id), serverRoles['Timeout'], function(error){
+      bot.sendMessage(msg.channel, "_<@" + msg.author.id + "> commited sudoku! Byebye. :P_");
+    });
+
+    // delete messages and KILL THE
+    if(msg_c[msg.author.id] != null) {
+      var d = msg_c[msg.author.id].slice(Math.max(msg_c[msg.author.id].length - 10, 1));
+
+      // delete spam
+      for(var key in d) {
+        colette.deleteMessage(d[key]);
+      }
+    }
+
+    setTimeout(function(){
+      bot.removeMemberFromRole(bot.users.get("id", msg.author.id), serverRoles['Timeout']);
+    }, 5000);
   }
 }
 
@@ -1902,4 +1909,9 @@ function removeCooldown(key) {
     setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * 15);
   }
 
+}
+
+// Extract user ID from a discord name tag.
+function exID(tag) {
+  return tag.slice(2, -1);
 }
