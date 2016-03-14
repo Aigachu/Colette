@@ -18,6 +18,11 @@ var moment = require('moment-timezone');
 // nconf -- Configuration Files
 var nconf = require('nconf');
 
+// jsonfile
+var jsonfile = require('jsonfile');
+
+var util = require('util');
+
 /********************************************************************************************/
 
 /* === Configurations === */
@@ -992,15 +997,48 @@ Commands[ "roulette" ] = {
   }
 }
 
-Commands[ "testme" ] = {
+/* === {NEO} COLOR MANAGEMENT === */
+/* === "THIS GON BE CLEAN AF THO" EDITION === */
+
+Commands[ "newColor" ] = {
   oplevel: 0,
   allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
-  cooldown: 5,
+  cooldown: 'none',
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[4]) {
+      // Error Message
+    } else {
+      // Color Permissions JSON
+      var colorPermsFile = './config/colorperms.json';
 
+      var colorPerms = JSON.parse(fs.readFileSync("./config/colorperms.json", "utf8"));
+
+      var colorName = 'colorrole:' + params[1];
+      var colorHex = params[2];
+      var colorPerm = params[3];
+
+      colorPerms[colorName] = colorPerm;
+
+      jsonfile.writeFile(colorPermsFile, colorPerms, function (err) {
+        console.error(err)
+      })
+
+      bot.createRole(msg.channel.server, { color : colorHex, name : colorName });
+      console.log(serverRoles);
+      // for (var key in serverRoles) {
+      //   if(serverRoles.hasOwnProperty(key)) {
+      //     if(serverRoles[key][n] == 'new role') {
+      //       bot.updateRole(serverRoles[key], {color : colorHex, name : colorName});
+      //     }
+      //   }
+      // }
+
+      bot.sendMessage(msg.channel, "Created the new color!");
+
+    }
   }
 }
 
