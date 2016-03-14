@@ -106,6 +106,9 @@ var AIGA_NEWCOMERS = '150507947816910848';
 // COLETTE REMOVALS CHANNEL
 var AIGA_REMOVALS = '150507988468105216';
 
+// COLETTE DEVELOPMENT CHANNEL
+var AIGA_DEV_COLETTE = '159026243021438978';
+
 // ANOTHER WORLD
 // COLETTE TEST CHANNEL
 var AWORLD_COLETTE = '103228407290003456';
@@ -279,6 +282,7 @@ Commands[ "guid" ] = {
       bot.deleteMessage(msg);
       bot.sendMessage(bot.users.get("id", msg.author.id), "Psst! Here's the id of the following user: **" + user.username + "**\n\n**" + userID + "**");
     } else {
+      bot.deleteMessage(msg);
       bot.sendMessage(bot.users.get("id", msg.author.id), "Heyyy...Ya done messed up mang. Add a parameter to the command. >.>");
     }
   }
@@ -583,6 +587,7 @@ Commands[ "timeout" ] = {
 // Must finish this command by adding a more persistent cache.
 // Messages are not getting deleted.
 // ONLY PURGES CACHE MESSAGES
+// CURRENTLY DOESN'T WORK BUT I DON'T REALLY CARE FOR NOW
 Commands[ "purge" ] = {
   oplevel: 1,
   allowed_channels: 'all',
@@ -643,7 +648,7 @@ Commands[ "deTo" ] = {
 
 Commands[ "rolldice" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -683,7 +688,7 @@ Commands[ "rolldice" ] = {
 
 Commands[ "coinflip" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -721,7 +726,7 @@ Commands[ "coinflip" ] = {
 
 Commands[ "love" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -738,7 +743,7 @@ Commands[ "love" ] = {
 
 Commands[ "8ball" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -844,7 +849,7 @@ Commands[ "8ball" ] = {
 
 Commands[ "seppuku" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -872,7 +877,7 @@ Commands[ "seppuku" ] = {
 
 Commands[ "roulette" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE],
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -977,6 +982,18 @@ Commands[ "roulette" ] = {
         bot.stopTyping(msg.channel);
       }, 2000);
     }, 1000);
+  }
+}
+
+Commands[ "testme" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 5,
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+
   }
 }
 
@@ -1414,12 +1431,12 @@ Reactions[ "aiga" ] = {
  */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
-  // console.log(msg);
+  console.log(msg);
 
   if(!msg.channel.recipient) {
     // Global Variable across message reactions to get the server the message was taken from.
     var msgServer   = msg.channel.server.name;
-    var serverRoles = getServerRoles(msg);
+    var serverRoles = msg.channel.server.roles;
     var authorRoles = msg.channel.server.rolesOfUser(msg.author);
   }
 
@@ -1885,18 +1902,4 @@ function removeCooldown(key) {
     setTimeout(function(){ COOLDOWNS[key] = false; console.log("Removed cooldown for " + key); }, 1000 * 15);
   }
 
-}
-
-// Get Server Roles
-function getServerRoles(msg) {
-  var rolesObject = msg.channel.server.roles;
-  var roles = [];
-
-  for (var key in rolesObject) {
-    if (rolesObject.hasOwnProperty(key)) {
-      roles[rolesObject[key]['name']] = rolesObject[key];
-    }
-  }
-
-  return roles;
 }
