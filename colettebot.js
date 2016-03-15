@@ -290,6 +290,25 @@ Commands[ "guid" ] = {
   }
 }
 
+Commands[ "pic" ] = {
+  oplevel: 0,
+  allowed_channels: 'all',
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[1]) {
+      var userID = exID(params[1]);
+      var user = bot.users.get("id", userID);
+      bot.sendMessage(msg.channel, user.avatarURL);
+    } else {
+      bot.deleteMessage(msg);
+      bot.sendMessage(bot.users.get("id", msg.author.id), "Heyyy...Ya done messed up mang. Add a parameter to the command. >.>");
+    }
+  }
+}
+
 Commands[ "setName" ] = {
   oplevel: 2,
   allowed_channels: 'all',
@@ -1010,6 +1029,10 @@ Commands[ "newColor" ] = {
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[4]) {
       // Error Message
+    } else if(params[3] < -1 || params[3] > 2 ) {
+      // Error Message
+    } else if(hasRole(msg.channel.server, "color::" + params[2])) {
+      // Error Message
     } else {
       // Color Permissions JSON
       var colorPermsFile = './config/colorperms.json';
@@ -1525,7 +1548,7 @@ Reactions[ "aiga" ] = {
  */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
-  // console.log(msg);
+  console.log(msg);
 
   if(!msg.channel.recipient) { // If it's not a PM.
     // Global Variable across message reactions to get the server the message was taken from.
@@ -2001,4 +2024,22 @@ function removeCooldown(key) {
 // Extract user ID from a discord name tag.
 function exID(tag) {
   return tag.slice(2, -1);
+}
+
+// Check if server or member has a role
+function hasRole(obj, role) {
+
+  if(role.position) {
+    var name = role.name;
+  } else {
+    var name = role;
+  }
+
+  if(obj.region) { // This is a server
+    if(obj.roles.get("name", name)) {
+      return true;
+    }
+  } else {
+    // Error Message
+  }
 }
