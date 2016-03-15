@@ -1014,30 +1014,79 @@ Commands[ "newColor" ] = {
       // Color Permissions JSON
       var colorPermsFile = './config/colorperms.json';
 
-      var colorPerms = JSON.parse(fs.readFileSync("./config/colorperms.json", "utf8"));
+      var colorPerms = {};
 
-      var colorName = 'colorrole:' + params[1];
-      var colorHex = params[2];
+      jsonfile.readFile(colorPermsFile, function(err, obj) {
+        if(err) {
+          console.log(err);
+        } else {
+          colorPerms = obj;
+        }
+      })
+
+      var colorName = 'color::' + params[1];
+      var colorHex = parseInt(params[2]);
       var colorPerm = params[3];
 
       colorPerms[colorName] = colorPerm;
 
       jsonfile.writeFile(colorPermsFile, colorPerms, function (err) {
-        console.error(err)
+        if(err) {
+          console.error(err)
+        }
       })
 
-      bot.createRole(msg.channel.server, { color : colorHex, name : colorName });
-      console.log(serverRoles);
-      // for (var key in serverRoles) {
-      //   if(serverRoles.hasOwnProperty(key)) {
-      //     if(serverRoles[key][n] == 'new role') {
-      //       bot.updateRole(serverRoles[key], {color : colorHex, name : colorName});
-      //     }
-      //   }
-      // }
+      var newRoleObject = {
+        color : colorHex,
+        hoist : false,
+        name : colorName,
+        permissions : [
+        // see the constants documentation for full permissions
+          "attachFiles", "sendMessages"
+        ]
+      };
+
+      bot.createRole(msg.channel.server, newRoleObject);
 
       bot.sendMessage(msg.channel, "Created the new color!");
 
+    }
+  }
+}
+
+Commands[ "setColor" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE, AIGA_DEV_COLETTE],
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[2]) {
+      bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**(for the fancy peeps)\n\nExample: `!setColor mistyrose`");
+    } else if(params[1]) {
+
+      var userHasColor = false;
+
+      for (var key in authorRoles) {
+        if(authorRoles.hasOwnProperty(key)) {
+          if(authorRoles[key].name.substring(0, 7) === 'color::'){
+            userHasColor = true;
+          }
+        }
+      }
+
+      function assignColor() {
+
+      }
+
+      if(userHasColor){
+        bot.sendMessage(msg.channel, "Use !unset to clear your current color first!");
+      } else {
+        assignColor();
+      }
+    } else {
+      bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**");
     }
   }
 }
@@ -1476,9 +1525,9 @@ Reactions[ "aiga" ] = {
  */
 colette.on("message", function (msg) {
   // Log Messages for DEV purposes
-  console.log(msg);
+  // console.log(msg);
 
-  if(!msg.channel.recipient) {
+  if(!msg.channel.recipient) { // If it's not a PM.
     // Global Variable across message reactions to get the server the message was taken from.
     var msgServer   = msg.channel.server.name;
     var serverRoles = msg.channel.server.roles;
