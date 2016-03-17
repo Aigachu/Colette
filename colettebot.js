@@ -164,6 +164,7 @@ var auto_time = true; // Enabled by default
 
 // Color Features Variables
 var COLOR_ROLE_PREFIX = "color::";
+var COLOR_PERMISSIONS_CONFIG_FILE = './config/colorperms.json';
 
 /* ***************************************|||||||||||||||||||||*************************************************** */
 /* *************************************** COMMANDS, REACTIONS *************************************************** */
@@ -1020,9 +1021,9 @@ Commands[ "roulette" ] = {
 /* === {NEO} COLOR MANAGEMENT === */
 /* === "THIS GON BE CLEAN AF THO" EDITION === */
 
-Commands[ "newColor" ] = {
-  oplevel: 0,
-  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
+Commands[ "mkcol" ] = {
+  oplevel: 2,
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1034,42 +1035,60 @@ Commands[ "newColor" ] = {
       bot.sendMessage(msg.channel, "The last parameter, **oplevel**, only accepts a value between 0 and 2! INTEGERS ONLY YOU BASTARD.");
     } else if(serverHasRole(msg.channel.server, COLOR_ROLE_PREFIX + params[1])) {
       bot.sendMessage(msg.channel, "You clever clever man. That color already exists. ;) You have to try harder to break me!");
+    } else if(!params[2]) {
+      bot.sendMessage(msg.channel, "You need to specify a name and a Hex value! i.e. `!mkcol red 0xFF0000`");
+    } else if(!params[1]) {
+      bot.sendMessage(msg.channel, "You need to specify a name and a Hex for the color! i.e. `!mkcol red 0xFF0000`");
     } else {
       // Color Permissions JSON
-      var colorPermsFile = './config/colorperms.json';
+      var role_name = COLOR_ROLE_PREFIX + params[1];
+      var color_hex_value = parseInt(params[2]);
 
-      var colorPerms = {};
+      // If the permission parameter is set, use the value.
+      // If not, default the value to 0.
+      // You need a value to store into the JSON.
+      if(params[3]) {
+        var color_oplevel = params[3];
+      } else {
+        var color_oplevel = 0;
+      }
 
-      jsonfile.readFile(colorPermsFile, function(err, obj) {
+      // Write new permission values to the JSON file.
+      jsonfile.readFile(COLOR_PERMISSIONS_CONFIG_FILE, function(err, obj) {
         if(err) {
           console.log(err);
+          var color_ops = {};
+          color_ops[role_name] = color_oplevel;
+
+          jsonfile.writeFile(COLOR_PERMISSIONS_CONFIG_FILE, color_ops, function (err) {
+            if(err) {
+              console.error(err)
+            }
+          });
         } else {
-          colorPerms = obj;
+          var color_ops = obj;
+          color_ops[role_name] = color_oplevel;
+
+          jsonfile.writeFile(COLOR_PERMISSIONS_CONFIG_FILE, color_ops, function (err) {
+            if(err) {
+              console.error(err)
+            }
+          });
         }
       })
 
-      var colorName = COLOR_ROLE_PREFIX + params[1];
-      var colorHex = parseInt(params[2]);
-      var colorPerm = params[3];
-
-      colorPerms[colorName] = colorPerm;
-
-      jsonfile.writeFile(colorPermsFile, colorPerms, function (err) {
-        if(err) {
-          console.error(err)
-        }
-      })
-
+      // Create new Role Object to add to the server.
       var newRoleObject = {
-        color : colorHex,
+        color : color_hex_value,
         hoist : false,
-        name : colorName,
+        name : role_name,
         permissions : [
         // see the constants documentation for full permissions
           "attachFiles", "sendMessages"
         ]
       };
 
+      // Add Role to the Server.
       bot.createRole(msg.channel.server, newRoleObject);
 
       bot.sendMessage(msg.channel, "Created the new color!");
@@ -1078,9 +1097,98 @@ Commands[ "newColor" ] = {
   }
 }
 
+Commands[ "rmcol" ] = {
+  oplevel: 2,
+  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    if(params[2]) { // If there is an extra parameter
+      bot.sendMessage(msg.channel, "Hey uhh Aiga? You added one more parameter ʸᵒᵘ ᶠᵘᶜᵏᶦᶰᵍ ᶦᵈᶦᵒᵗ ^_^ :blue_heart:.");
+    } else if(!serverHasRole(msg.channel.server, COLOR_ROLE_PREFIX + params[1])) {
+      bot.sendMessage(msg.channel, "You clever clever man. That color doesn't exist! ;) You have to try harder to break me!");
+    } else if(!params[1]) {
+      bot.sendMessage(msg.channel, "You have to specify which color you want to remove! Use `!colorlist` if you forgot which colors you added, ya doofus. :3");
+    } else {
+      // Variables
+      var color_name = params[1];
+      var role_name = COLOR_ROLE_PREFIX + params[1];
+
+      jsonfile.readFile(COLOR_PERMISSIONS_CONFIG_FILE, function(err, obj) {
+        if(err) {
+          // This shouldn't happen, theoretically.
+          console.log(err);
+        } else {
+          var color_ops = obj;
+          delete color_ops[role_name];
+
+          jsonfile.writeFile(COLOR_PERMISSIONS_CONFIG_FILE, color_ops, function (err) {
+            if(err) {
+              console.error(err)
+            }
+          });
+        }
+      })
+
+      var roleToDelete = msg.channel.server.roles.get("name", role_name);
+
+      bot.deleteRole(roleToDelete);
+
+      bot.sendMessage(msg.channel, "Deleted the color **"+ color_name + "**!");
+
+    }
+  }
+}
+
+// @ TODO
+// Commands[ "rolemod" ] = {
+//   oplevel: 2,
+//   allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, AWORLD_COLETTE],
+//   allowed_servers: 'all',
+//   excluded_channels: 'none',
+//   excluded_servers: 'none',
+//   cooldown: 'none',
+//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+//     if(params[2]) { // If there is an extra parameter
+//       bot.sendMessage(msg.channel, "Hey uhh Aiga? You added one more parameter ʸᵒᵘ ᶠᵘᶜᵏᶦᶰᵍ ᶦᵈᶦᵒᵗ ^_^ :blue_heart:.");
+//     } else if(!serverHasRole(msg.channel.server, COLOR_ROLE_PREFIX + params[1])) {
+//       bot.sendMessage(msg.channel, "You clever clever man. That color doesn't exist! ;) You have to try harder to break me!");
+//     } else if(!params[1]) {
+//       bot.sendMessage(msg.channel, "You have to specify which color you want to remove! Use `!colorlist` if you forgot which colors you added, ya doofus. :3");
+//     } else {
+
+//       var roleToModify = msg.channel.server.roles.get("name", role_name);
+//       var role_name = COLOR_ROLE_PREFIX + params[1];
+
+//       jsonfile.readFile(COLOR_PERMISSIONS_CONFIG_FILE, function(err, obj) {
+//         if(err) {
+//           // This shouldn't happen, theoretically.
+//           console.log(err);
+//         } else {
+//           var color_ops = obj;
+//           delete color_ops[role_name];
+
+//           jsonfile.writeFile(COLOR_PERMISSIONS_CONFIG_FILE, color_ops, function (err) {
+//             if(err) {
+//               console.error(err)
+//             }
+//           });
+//         }
+//       })
+
+//       bot.deleteRole(roleToDelete);
+
+//       bot.sendMessage(msg.channel, "Deleted the color **"+ color_name + "**!");
+
+//     }
+//   }
+// }
+
 Commands[ "setColor" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE, AIGA_DEV_COLETTE],
+  allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1091,23 +1199,20 @@ Commands[ "setColor" ] = {
       bot.sendMessage( msg.channel, "This command only accepts one argument!\n\nYou need to specify **one** color!");
     } else if(userHasColor(msg.channel.server, msg.author)) {
       bot.sendMessage( msg.channel, "You already have a color! Use !unset to clear your current color first!");
+    } else if(!serverHasRole(msg.channel.server, COLOR_ROLE_PREFIX + params[1])) {
+      bot.sendMessage( msg.channel, "Hmm...I don't think that color exists. Might have to ask Aiga for that!");
     } else if(params[1]) {
 
-      assignColor();
-
-    } else {
-      bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**");
-    }
-
-    function assignColor() {
       var color_name = params[1];
       var role_name = COLOR_ROLE_PREFIX + color_name;
 
-      console.log(serverRoles);
-
       bot.addMemberToRole(msg.author, msg.channel.server.roles.get("name", role_name), function(error){
-        bot.sendMessage(msg.channel, "Successfully set your color to **" + color_name + "** :blue_heart:");
+        console.log(error);
+        bot.sendMessage(msg.channel, "Successfully set your color to **" + color_name + "** :blue_heart: ... I think. ;_;\n\nIf it didn't work, contact Aiga! He'll set your color manually.");
       });
+
+    } else {
+      bot.sendMessage( msg.channel, "You need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**");
     }
 
   }
@@ -1115,7 +1220,7 @@ Commands[ "setColor" ] = {
 
 Commands[ "unset" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1143,7 +1248,7 @@ Commands[ "unset" ] = {
 
 Commands[ "colorlist" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE],
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1151,17 +1256,21 @@ Commands[ "colorlist" ] = {
   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
     if(params[1]) {
       bot.sendMessage( msg.channel, "Just type in `!colorlist`. No parameters needed!");
-    } else {
+    } else if(!serverHasColor(msg.channel.server)) {
+      bot.sendMessage( msg.channel, "I don't think there are any custom colors on this server! Ask Aiga to make some. :)");
+    } else{
 
-      var message = "Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument, which is the color you want! Here is the list of available colors: \n\n";
+      var message = "Here is the list of available colors: \n\n";
 
-      for (var key in authorRoles) {
-        if(authorRoles.hasOwnProperty(key)) {
-          if(authorRoles[key].name.substring(0, COLOR_ROLE_PREFIX.length) === COLOR_ROLE_PREFIX){
-            message = message + "-- " + authorRoles[key].name + "\n\n";
+      for (var key in serverRoles) {
+        if(serverRoles.hasOwnProperty(key) && key !== 'limit' && key !== 'length') {
+          if(serverRoles[key].name.substring(0, COLOR_ROLE_PREFIX.length) === COLOR_ROLE_PREFIX){
+            message = message + "-- **" + serverRoles[key].name.substring(COLOR_ROLE_PREFIX.length, serverRoles[key].name.length) + "**\n\n";
           }
         }
       }
+
+      message = message + "Set one with the !setColor command. :D\n\nThe !setColor command only accepts one argument, which is the color you want!";
 
       bot.sendMessage(msg.channel, message);
 
@@ -1169,17 +1278,17 @@ Commands[ "colorlist" ] = {
   }
 }
 
-// Commands[ "colorhelp" ] = {
-//   oplevel: 0,
-//   allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
-//   allowed_servers: 'all',
-//   excluded_channels: 'none',
-//   excluded_servers: 'none',
-//   cooldown: 'none',
-//   fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
-//     bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument!\n\nYou need to specify **one** color! The available options are:\n  -- **red**\n  -- **lightpink**\n  -- **hotpink**\n  -- **crimson**\n  -- **mistyrose**  \n  -- **lavender**\n  -- **skyblue**\n  -- **violet**\n\nExample: `!setColor mistyrose`\n\nIf you already have a color set, make sure you use the `!unset` command to clear your current color first!\n\nThat's it. :) Have a fun Valentine's Week. ;)");
-//   }
-// }
+Commands[ "colorhelp" ] = {
+  oplevel: 0,
+  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE],
+  allowed_servers: 'all',
+  excluded_channels: 'none',
+  excluded_servers: 'none',
+  cooldown: 'none',
+  fn: function( bot, params, msg, msgServer, serverRoles, authorRoles ) {
+    bot.sendMessage(msg.channel, "To set your color, you can use the `!setColor` command!\n\nThe !setColor command only accepts one argument, which is the color you want. Use `!colorlist` to get the list of colors!\n\nIf you'd like to request a new color, call Aiga and pester him to make it. Make sure you know the HEX value of your color. ;)");
+  }
+}
 
 /** END COLOR INTEGRATION **/
 
@@ -1926,6 +2035,20 @@ function serverHasRole(server, role) {
   } else {
     // Error Message
   }
+}
+
+// Used in Color Features
+function serverHasColor(server){
+  var roles = server.roles;
+
+  for (var key in roles) {
+    if(roles.hasOwnProperty(key) && key !== "limit" && key != "length") {
+      if(roles[key].name.substring(0, COLOR_ROLE_PREFIX.length) === COLOR_ROLE_PREFIX){
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // Check if server or member has a role
