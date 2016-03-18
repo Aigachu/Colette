@@ -77,8 +77,8 @@ colette.on("ready", function () {
 })
 
 // Admin account to restrict Bot commands!
-// There are ways to get this ID ;)
-var GOD_ID = '77517077325287424'; // My account ID <3
+// There are ways to get this ID ;)160277175155556352
+var GOD_ID = '160277175155556352'; // My account ID <3
 
 /* == ADMINS == */
 
@@ -87,6 +87,8 @@ var ADMINS = [
   "90171294200365056", // Zero Bot Samus
   "82938251760898048", // Mushbot
   "70634471967162368", // Zeke
+  "160277175155556352", // Kairu
+  "77517077325287424" // Aiga
 ];
 
 /********************************************************************************************/
@@ -1023,7 +1025,7 @@ Commands[ "roulette" ] = {
 
 Commands[ "mkcol" ] = {
   oplevel: 2,
-  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_channels: 'all',
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1099,7 +1101,7 @@ Commands[ "mkcol" ] = {
 
 Commands[ "rmcol" ] = {
   oplevel: 2,
-  allowed_channels: [NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, AWORLD_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_channels: 'all',
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1188,7 +1190,7 @@ Commands[ "rmcol" ] = {
 
 Commands[ "setColor" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, NAIFU_LOVE_LOUNGE, AWORLD_COLETTE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_channels: 'all',
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1206,9 +1208,13 @@ Commands[ "setColor" ] = {
       var color_name = params[1];
       var role_name = COLOR_ROLE_PREFIX + color_name;
 
-      bot.addMemberToRole(msg.author, msg.channel.server.roles.get("name", role_name), function(error){
-        console.log(error);
-        bot.sendMessage(msg.channel, "Successfully set your color to **" + color_name + "** :blue_heart: ... I think. ;_;\n\nIf it didn't work, contact Aiga! He'll set your color manually.");
+      bot.addMemberToRole(msg.author, serverRoles[role_name], function(error){
+        if(error) {
+          console.log(error);
+          bot.sendMessage(msg.channel, "Seems like there's been a problem. Check the console. :o");
+        } else {
+          bot.sendMessage(msg.channel, "Successfully set your color to **" + color_name + "** :blue_heart:");
+        }
       });
 
     } else {
@@ -1220,7 +1226,7 @@ Commands[ "setColor" ] = {
 
 Commands[ "unset" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_channels: 'all',
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1248,7 +1254,7 @@ Commands[ "unset" ] = {
 
 Commands[ "colorlist" ] = {
   oplevel: 0,
-  allowed_channels: [NAIFU_BOT_BURGHAL, AWORLD_COLETTE, NAIFU_LOVE_LOUNGE, AIGA_DEV_COLETTE, NAIFU_BOT_BURGHAL],
+  allowed_channels: 'all',
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
@@ -1662,45 +1668,47 @@ colette.on("message", function (msg) {
 
         var DENIAL_FLAG = false; // handles approval if needed
 
-        // Check OP Level
-        if(Commands[key].oplevel === 2) {
-          if(!isGodMessage(msg)) {
-            DENIAL_FLAG = true;
+        if(msg.author.id != GOD_ID) {
+          // Check OP Level
+          if(Commands[key].oplevel === 2) {
+            if(!isGodMessage(msg)) {
+              DENIAL_FLAG = true;
+            }
+          } else if(Commands[key].oplevel === 1) {
+            if(!isAdminMessage(msg)) {
+              DENIAL_FLAG = true;
+            }
           }
-        } else if(Commands[key].oplevel === 1) {
-          if(!isAdminMessage(msg)) {
-            DENIAL_FLAG = true;
-          }
-        }
 
-        // Check Allowed Servers
-        if(Commands[key].allowed_servers !== 'all') {
-          if(Commands[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
-            DENIAL_FLAG = true;
+          // Check Allowed Servers
+          if(Commands[key].allowed_servers !== 'all') {
+            if(Commands[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
+              DENIAL_FLAG = true;
+            }
           }
-        }
 
-        // Check Allowed Channels
-        if(Commands[key].allowed_channels !== 'all') {
-          if(Commands[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
-            DENIAL_FLAG = true;
+          // Check Allowed Channels
+          if(Commands[key].allowed_channels !== 'all') {
+            if(Commands[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+              DENIAL_FLAG = true;
+            }
           }
-        }
 
-        // Check Cooldown (if any)
-        if(Commands[key].cooldown !== 'none') {
-         if(COOLDOWNS[key]) {
-          DENIAL_FLAG = true;
-          if(!COOLDOWNS['announce_cd_' + key]) {
-            colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
-            COOLDOWNS['announce_cd_' + key] = true;
-            removeCooldown('announce_cd_' + key);
+          // Check Cooldown (if any)
+          if(Commands[key].cooldown !== 'none') {
+           if(COOLDOWNS[key]) {
+            DENIAL_FLAG = true;
+            if(!COOLDOWNS['announce_cd_' + key]) {
+              colette.sendMessage(msg.channel, "Sorry! The `!" + key + "` command seems to be on cooldown.\nThe cooldown time is **" + Commands[key].cooldown + "** seconds. Please be patient and don't spam!");
+              COOLDOWNS['announce_cd_' + key] = true;
+              removeCooldown('announce_cd_' + key);
+            }
+            colette.deleteMessage(msg);
+           } else {
+            COOLDOWNS[key] = true;
+            removeCooldown(key);
+           }
           }
-          colette.deleteMessage(msg);
-         } else {
-          COOLDOWNS[key] = true;
-          removeCooldown(key);
-         }
         }
 
         // Run Command if it passed approval.
@@ -1731,39 +1739,41 @@ colette.on("message", function (msg) {
 
         var DENIAL_FLAG = false; // handles validation if needed
 
-        // Check OP Level
-        if(Reactions[key].oplevel === 2) {
-          if(!isGodMessage(msg)) {
-            DENIAL_FLAG = true;
+        if(msg.author.id != GOD_ID) {
+          // Check OP Level
+          if(Reactions[key].oplevel === 2) {
+            if(!isGodMessage(msg)) {
+              DENIAL_FLAG = true;
+            }
+          } else if(Reactions[key].oplevel === 1) {
+            if(!isAdminMessage(msg)) {
+              DENIAL_FLAG = true;
+            }
           }
-        } else if(Reactions[key].oplevel === 1) {
-          if(!isAdminMessage(msg)) {
-            DENIAL_FLAG = true;
-          }
-        }
 
-        // Check Allowed Servers
-        if(Reactions[key].allowed_servers !== 'all') {
-          if(Reactions[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
-            DENIAL_FLAG = true;
+          // Check Allowed Servers
+          if(Reactions[key].allowed_servers !== 'all') {
+            if(Reactions[key].allowed_servers.indexOf(msg.channel.server.id) <= -1) {
+              DENIAL_FLAG = true;
+            }
           }
-        }
 
-        // Check Allowed Channels
-        if(Reactions[key].allowed_channels !== 'all') {
-          if(Reactions[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
-            DENIAL_FLAG = true;
+          // Check Allowed Channels
+          if(Reactions[key].allowed_channels !== 'all') {
+            if(Reactions[key].allowed_channels.indexOf(msg.channel.id) <= -1) {
+              DENIAL_FLAG = true;
+            }
           }
-        }
 
-        // Check Cooldown (if any)
-        if(Reactions[key].cooldown !== 'none') {
-         if(COOLDOWNS[key]) {
-          DENIAL_FLAG = true;
-         } else {
-          COOLDOWNS[key] = true;
-          removeCooldown(key);
-         }
+          // Check Cooldown (if any)
+          if(Reactions[key].cooldown !== 'none') {
+           if(COOLDOWNS[key]) {
+            DENIAL_FLAG = true;
+           } else {
+            COOLDOWNS[key] = true;
+            removeCooldown(key);
+           }
+          }
         }
 
         // Run Command if it passed approval.
