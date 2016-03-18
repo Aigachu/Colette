@@ -30,8 +30,8 @@ var util = require('util');
 
 /**
  * discord.js
- * Uses the discord.js module made by hydrabolt.
- * @DOCU: https://discordjs.readthedocs.org/en/latest/
+ * Uses the discord.js script made by hydrabolt.
+ * @documentation: https://discordjs.readthedocs.org/en/latest/
  */
 
 // This instantiates a Discord Client that the bot uses.
@@ -67,7 +67,7 @@ var twitch = new TwitchObject(twitch_id);
 // Login
 colette.login(auth.email, auth.pass)
   .then(function (token) {
-    console.log("Initating cuteness...");
+    console.log("Initating kawaii levels...");
   }).catch(function (error) {
     console.log(error);
   });
@@ -314,7 +314,7 @@ Commands[ "pic" ] = {
 
 Commands[ "setName" ] = {
   oplevel: 2,
-  allowed_channels: 'all',
+  allowed_channels: [AWORLD_COLETTE],
   allowed_servers: 'all',
   excluded_channels: 'none',
   excluded_servers: 'none',
