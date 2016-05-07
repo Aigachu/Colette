@@ -62,10 +62,10 @@ var twitch = new TwitchObject(twitch_id);
 /********************************************************************************************/
 
 /* === Configurations === */
-// @todo
+// https://discordapp.com/oauth2/authorize?client_id=178562645971042305&scope=bot&permissions=0
 
 // Login
-colette.login(auth.email, auth.pass)
+colette.loginWithToken(auth.token)
   .then(function (token) {
     console.log("Initating kawaii levels...");
   }).catch(function (error) {
@@ -78,7 +78,7 @@ colette.on("ready", function () {
 
 // Admin account to restrict Bot commands!
 // There are ways to get this ID ;)160277175155556352
-var GOD_ID = '160277175155556352'; // My account ID <3
+var GOD_ID = '77517077325287424'; // My account ID <3
 
 /* == ADMINS == */
 
@@ -323,9 +323,13 @@ Commands[ "setName" ] = {
     if(params[1]) {
       var newName = msg.content.substring(params[0].length, msg.content.length);
       bot.setUsername(newName).catch(function(err){
-        console.log(err);
+        if(err) {
+          bot.sendMessage( msg.channel, "There seems to have been an error.\nAllow me to format it for you.\n\n```" + err + "```\nI have logged the console with more information.");
+          console.log(err);
+        } else {
+          bot.sendMessage( msg.channel, "Got it! I'll change my name right now.");
+        }
       });
-      bot.sendMessage( msg.channel, "Changing my name!");
     } else {
       bot.sendMessage( msg.channel, "Change it to what?...I can't change it to blank. -_-");
     }
