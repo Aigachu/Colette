@@ -1,0 +1,28 @@
+{
+  "name": "colettebot",
+  "version": "1.0.0",
+  "description": "Colettebot is an personal bot made by branching off of hydrabolt's beautiful discord connection script, [discord.js](https://github.com/hydrabolt/discord.js/).",
+  "main": "colettebot.js",
+  "dependencies": {
+    "forever": "^0.15.1",
+    "jsonfile": "^2.2.3",
+    "discord.js": "^7.0.1",
+    "needle": "^0.10.0",
+    "nconf": "^0.7.2",
+    "moment-timezone": "^0.4.1",
+    "request": "^2.67.0",
+    "ws": "^0.8.0",
+    "superagent": "^1.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/Aigachu/colettebot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/Aigachu/colettebot#readme"
+}

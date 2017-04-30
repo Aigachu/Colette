@@ -4,3 +4,4 @@ auth.json
 liveauth.json
 devauth.json
 config
+node_modules/*
