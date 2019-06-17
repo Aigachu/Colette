@@ -1,4 +1,4 @@
-# colettebot
+# colettebot (No longer maintained)
 Colettebot is an personal bot made by branching off of hydrabolt's beautiful discord connection script, [discord.js](https://github.com/hydrabolt/discord.js/).
 
 ### Set up
